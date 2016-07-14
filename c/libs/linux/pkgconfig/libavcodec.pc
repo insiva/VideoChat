@@ -1,0 +1,14 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=/home/zzh/workspace/VideoChat/c/libs/linux
+includedir=/home/zzh/workspace/VideoChat/c/include
+
+Name: libavcodec
+Description: FFmpeg codec library
+Version: 57.48.101
+Requires: libavutil >= 55.28.100
+Requires.private: 
+Conflicts:
+Libs: -L${libdir}  -lavcodec -lxcb -lxcb-shm -lxcb -lxcb-xfixes -lxcb-render -lxcb-shape -lxcb -lxcb-shape -lxcb -lX11 -lm -llzma -pthread
+Libs.private: 
+Cflags: -I${includedir}

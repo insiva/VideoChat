@@ -1,0 +1,7 @@
+x264:
+./configure --enable-pic --enable-strip --enable-static --cross-prefix=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/arm-linux-androideabi- --sysroot=$ANDROID_NDK/platforms/android-18/arch-arm --host=arm-linux --prefix=./build --extra-cflags="-march=armv7-a -mtune=cortex-a8 -mfloat-abi=softfp -mfpu=neon -D__ARM_ARCH_7__ -D__ARM_ARCH_7A__" --libdir=/home/zzh/workspace/c/VideoChat/libs/android --includedir=/home/zzh/workspace/VideoChat/c/include
+
+
+
+ffmpeg:
+./configure --disable-ffprobe --disable-avdevice --disable-avfilter --disable-doc --disable-htmlpages --disable-manpages --disable-podpages --disable-txtpages --disable-everything --disable-muxers --disable-parsers --disable-demuxers --disable-avdevice --disable-armv5te --disable-armv6 --disable-armv6t2 --disable-zlib --disable-bzlib --disable-debug --disable-ffmpeg --disable-ffserver --disable-ffplay --disable-muxers --disable-filters --disable-devices --disable-encoders --disable-hwaccels --enable-static --enable-memalign-hack --enable-small --enable-decoder=h264 --enable-protocols --disable-asm --enable-pic --cross-prefix=$ANDROID_NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/arm-linux-androideabi- --sysroot=$ANDROID_NDK/platforms/android-18/arch-arm --target-os=linux --arch=arm --enable-cross-compile --libdir=/home/zzh/workspace/VideoChat/c/libs/android --incdir=/home/zzh/workspace/VideoChat/c/include

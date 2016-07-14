@@ -1,0 +1,11 @@
+prefix=./build
+exec_prefix=${prefix}
+libdir=/home/zzh/workspace/VideoChat/c/libs/linux
+includedir=/home/zzh/workspace/VideoChat/c/include
+
+Name: x264
+Description: H.264 (MPEG4 AVC) encoder library
+Version: 0.148.x
+Libs: -L/home/zzh/workspace/VideoChat/c/libs/linux -lx264 -lpthread -lm -ldl
+Libs.private: 
+Cflags: -I/home/zzh/workspace/VideoChat/c/include
