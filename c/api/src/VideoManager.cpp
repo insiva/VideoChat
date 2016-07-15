@@ -9,10 +9,15 @@
 
 VideoManager::VideoManager(RtpManager * rtpManager) :
 		pRtpManager(rtpManager), pEncodeI420Buffer(XNULL), pDecodeYv12Buffer(
-		XNULL), pDecodeI420Buffer(XNULL), mEncodeWidth(0), mEncodeFps(0), mEncodeHeight(
-				0), mDecodeWidth(0), mDecodeHeight(0), mDecodeFps(0) {
+		XNULL), pDecodeI420Buffer(XNULL), nEncodeWidth(0), nEncodeFps(0), nEncodeHeight(
+				0), nDecodeWidth(0), nDecodeHeight(0), nDecodeFps(0) {
 	this->pEncoder = new H264Encoder();
 	this->pDecoder = new H264Decoder();
+#ifdef __ANDROID__
+	nGlViewWidth=0;
+	nGlViewHeight=0;
+	pGlHelper=XNULL;
+#endif
 }
 
 VideoManager::~VideoManager() {
@@ -24,9 +29,9 @@ void VideoManager::initEncoder(int width, int height, int fps) {
 	this->pEncoder->set(width, height, fps, VIDEO_BITRATE);
 	this->pEncoder->open();
 	this->pEncodeI420Buffer = new uchar[width * height * 3 / 2];
-	this->mEncodeWidth = width;
-	this->mEncodeHeight = height;
-	this->mEncodeFps = fps;
+	this->nEncodeWidth = width;
+	this->nEncodeHeight = height;
+	this->nEncodeFps = fps;
 }
 
 void VideoManager::deinitEncoder() {
@@ -35,18 +40,21 @@ void VideoManager::deinitEncoder() {
 		delete[] this->pEncodeI420Buffer;
 		this->pEncodeI420Buffer = XNULL;
 	}
-	this->mEncodeWidth = 0;
-	this->mEncodeHeight = 0;
-	this->mEncodeFps = 0;
+	this->nEncodeWidth = 0;
+	this->nEncodeHeight = 0;
+	this->nEncodeFps = 0;
 }
 
 void VideoManager::initDecoder(int width, int height, int fps) {
 	this->pDecoder->set(width, height, fps);
 	this->pDecodeYv12Buffer = new uchar[width * height * 3 / 2];
 	this->pDecodeI420Buffer = new uchar[width * height * 3 / 2];
-	this->mDecodeWidth = width;
-	this->mDecodeHeight = height;
-	this->mDecodeFps = fps;
+	this->nDecodeWidth = width;
+	this->nDecodeHeight = height;
+	this->nDecodeFps = fps;
+#ifdef __ANDROID__
+	this->initGlHepler(this->nGlViewWidth, this->nGlViewHeight);
+#endif
 }
 
 void VideoManager::deinitDecoder() {
@@ -56,14 +64,14 @@ void VideoManager::deinitDecoder() {
 		delete[] this->pDecodeI420Buffer;
 		this->pDecodeI420Buffer = XNULL;
 	}
-	this->mDecodeWidth = 0;
-	this->mDecodeHeight = 0;
-	this->mDecodeFps = 0;
+	this->nDecodeWidth = 0;
+	this->nDecodeHeight = 0;
+	this->nDecodeFps = 0;
 }
 
 void VideoManager::onYv12FramePushed(uchar *yv12Frame) {
 	VideoManager::yv12ToI420(this->pEncodeI420Buffer, yv12Frame,
-			this->mEncodeWidth, this->mEncodeHeight);
+			this->nEncodeWidth, this->nEncodeHeight);
 	x264_nal_t *nals;
 	int nnal;
 	int fs = this->pEncoder->encode(&nals, &nnal, this->pEncodeI420Buffer);
@@ -78,14 +86,26 @@ void VideoManager::onYv12FramePushed(uchar *yv12Frame) {
 }
 
 void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
+#ifdef __ANDROID__
+	if (this->pGlHelper == XNULL) {
+		return;
+	}
+#endif
+
 	int frameFinished = 0;
 	this->pDecoder->decode((uchar *) h264Buffer, h264Length, &frameFinished,
 			this->pDecodeI420Buffer);
 	if (frameFinished) {
 		LOG("A Recved H264 Frame Decoded, Size=%d.\n", h264Length);
-		VideoManager::i420ToYv12(this->pDecodeYv12Buffer,
-				this->pDecodeI420Buffer, this->mDecodeWidth,
-				this->mDecodeHeight);
+#ifdef __ANDROID__
+		this->pGlHelper->write(this->pDecodeI420Buffer,
+				this->nDecodeWidth * this->nDecodeHeight * 3 / 2);
+#endif
+		/*
+		 VideoManager::i420ToYv12(this->pDecodeYv12Buffer,
+		 this->pDecodeI420Buffer, this->mDecodeWidth,
+		 this->mDecodeHeight);
+		 */
 	}
 
 }
@@ -108,3 +128,32 @@ void VideoManager::i420ToYv12(uchar *yv12Buffer, const uchar *i420Buffer,
 			width * height / 4);
 }
 
+#ifdef __ANDROID__
+void VideoManager::initGlHepler(int viewWidth, int viewHeight) {
+	this->nGlViewWidth = viewWidth;
+	this->nGlViewHeight = viewHeight;
+	if (this->nGlViewWidth > 0 && this->nDecodeWidth > 0) {
+		if (this->pGlHelper != XNULL) {
+			delete this->pGlHelper;
+			this->pGlHelper = XNULL;
+		}
+		this->pGlHelper = new GlHelper(this->nGlViewWidth, this->nGlViewHeight,
+				this->nDecodeWidth, this->nDecodeHeight);
+	}
+}
+
+void VideoManager::deinitGlHelper() {
+	if (this->pGlHelper != XNULL) {
+		delete this->pGlHelper;
+		this->pGlHelper = XNULL;
+	}
+	this->nGlViewHeight = 0;
+	this->nGlViewWidth = 0;
+}
+
+void VideoManager::render() {
+	if (this->pGlHelper != XNULL) {
+		this->pGlHelper->render();
+	}
+}
+#endif

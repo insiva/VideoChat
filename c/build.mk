@@ -10,6 +10,7 @@ MEDIADIR :=$(VCDIR)/media
 SRDIR :=$(VCDIR)/sim_rtp
 APIDIR :=$(VCDIR)/api
 SWIGDIR := $(VCDIR)/swig
+ANDROIDDIR := $(VCDIR)/android
 
 MYDIR := $(CURDIR)/..
 ODIR :=$(MYDIR)/output
@@ -29,7 +30,6 @@ CFLAGS += -I $(XLIBSDIR)/include
 CFLAGS += -I $(MEDIADIR)/include
 CFLAGS += -I $(SRDIR)/include
 CFLAGS += -I $(APIDIR)/include
-CFLAGS += -I $(SWIGDIR)/src
 
 CFLAGS += -std=c++11
 

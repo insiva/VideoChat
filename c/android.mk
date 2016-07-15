@@ -19,13 +19,16 @@ SYS_ROOT := $(ANDROID_NDK)/platforms/$(TARGET_PLATFORM)/$(TARGET_ARCH)
 CFLAGS += --sysroot=$(SYS_ROOT)
 
 STL_PATH := $(ANDROID_NDK)/sources/cxx-stl/gnu-libstdc++/$(GCC_VERSION)
-LDFLAGS += -L$(STL_PATH)/libs/$(ABI)
+CFLAGS += -I $(SWIGDIR)/src
+CFLAGS += -I $(ANDROIDDIR)/include
 CFLAGS += -I $(STL_PATH)/include
 CFLAGS += -I $(STL_PATH)/libs/$(ABI)/include
+LDFLAGS += -L$(STL_PATH)/libs/$(ABI)
 CFLAGS +=  -fexceptions
 
 
 LIBS += -llog
+LIBS += -lGLESv2
 #LIBS += -lgnustl_shared
 LIBS += -lgnustl_static
 LIBS += -lstdc++

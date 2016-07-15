@@ -146,17 +146,31 @@ void VcManager::setMyCameraParameters(int width, int height, int fps) {
 
 void VcManager::setRemoteCameraParameters(int width, int height, int fps) {
 	this->pVideoManager->initDecoder(width, height, fps);
+	//this->pVideoManager->setGlVideoSize(width,height);
 }
 
 int VcManager::getEncodeWidth() const {
-	return this->pVideoManager->mEncodeWidth;
+	return this->pVideoManager->nEncodeWidth;
 }
 
 int VcManager::getEncodeHeight() const {
-	return this->pVideoManager->mEncodeHeight;
+	return this->pVideoManager->nEncodeHeight;
 }
 
 int VcManager::getEncodeFps() const {
-	return this->pVideoManager->mEncodeFps;
+	return this->pVideoManager->nEncodeFps;
 }
 
+#ifdef __ANDROID__
+void VcManager::initGl(int viewWidth, int viewHeight) {
+	this->pVideoManager->initGlHepler(viewWidth, viewHeight);
+}
+
+void VcManager::deinitGl() {
+	this->pVideoManager->deinitGlHelper();
+}
+
+void VcManager::render() {
+	this->pVideoManager->render();
+}
+#endif

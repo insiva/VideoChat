@@ -13,6 +13,10 @@
 #include<media/H264Decoder.h>
 #include<sim_rtp/RtpManager.h>
 
+#ifdef __ANDROID__
+#include<android/GlHelper.h>
+#endif
+
 class VideoManager {
 	friend class VcManager;
 public:
@@ -30,11 +34,19 @@ private:
 	H264Decoder *pDecoder;
 	uchar *pEncodeI420Buffer;
 	uchar *pDecodeYv12Buffer, *pDecodeI420Buffer;
-	int mEncodeWidth, mEncodeHeight;
-	int mEncodeFps;
-	int mDecodeWidth, mDecodeHeight;
-	int mDecodeFps;
+	int nEncodeWidth, nEncodeHeight;
+	int nEncodeFps;
+	int nDecodeWidth, nDecodeHeight;
+	int nDecodeFps;
 	RtpManager *pRtpManager;
+
+#ifdef __ANDROID__
+	void initGlHepler(int viewWidth, int viewHeight);
+	void deinitGlHelper();
+	void render();
+	GlHelper *pGlHelper;
+	int nGlViewWidth, nGlViewHeight;
+#endif
 	//void pushYv12Frame(char *buffer, size_t length);
 
 private:

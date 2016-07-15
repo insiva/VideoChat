@@ -4,18 +4,21 @@ ODIR := $(VCDIR)/output
 TDIR := $(VCDIR)/test
 
 #SUBDIRS := $(MEDIADIR)
-SUBDIRS := $(SWIGDIR) $(APIDIR) $(SRDIR) $(XLIBSDIR) $(MEDIADIR) $(UTILSDIR)
-
+ifeq ($(ANDROID),1)
+SUBDIRS := $(ANDROIDDIR) $(SWIGDIR) $(APIDIR) $(SRDIR) $(XLIBSDIR) $(MEDIADIR) $(UTILSDIR)
+else
+SUBDIRS := $(APIDIR) $(SRDIR) $(XLIBSDIR) $(MEDIADIR) $(UTILSDIR)
+endif
 .PHONY: o all clean
 
 LDFLAGS += $(foreach n,$(SUBDIRS),-L$(n)/libs)
 #LIBS := $(foreach n,$(SUBDIRS),-l$(notdir $(n))) $(LIBS)
 OBJS := $(foreach n,$(SUBDIRS),$(n)/output/*.o)
-ifeq ($(ANDROID),1)
-SO_PATH:=$(ANDROID_PROJECT_DIR)/libs/armeabi/libVideoChat.so
-V7A_SO_PATH:=$(ANDROID_PROJECT_DIR)/libs/armeabi-v7a/libVideoChat.so
-else
+
 SO_PATH:=$(ODIR)/libVideoChat.so
+ifeq ($(ANDROID),1)
+ARM_PATH:=$(ANDROID_PROJECT_DIR)/libs/armeabi/libVideoChat.so
+ARMV7A_SO_PATH:=$(ANDROID_PROJECT_DIR)/libs/armeabi-v7a/libVideoChat.so
 endif
 
 all:libVideoChat.so
@@ -43,7 +46,8 @@ ifneq ('$(DEBUG)','1')
 	$(STRIP) $(SO_PATH)
 endif
 ifeq ('$(ANDROID)','1')
-	cp $(SO_PATH) $(V7A_SO_PATH)
+	cp $(SO_PATH) $(ARM_PATH)
+	cp $(SO_PATH) $(ARMV7A_SO_PATH)
 endif
 
 subdirs:
