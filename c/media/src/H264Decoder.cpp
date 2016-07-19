@@ -18,9 +18,9 @@ void H264Decoder::init() {
 	H264Decoder::bInitialized = true;
 }
 
-H264Decoder::H264Decoder() {
-	if(!H264Decoder::bInitialized)
-	{
+H264Decoder::H264Decoder() :
+		bOpen(false) {
+	if (!H264Decoder::bInitialized) {
 		H264Decoder::init();
 	}
 	XASSERT(H264Decoder::bInitialized, "H264Decoder Not Inited!\n");
@@ -36,6 +36,7 @@ H264Decoder::H264Decoder() {
 }
 
 H264Decoder::~H264Decoder() {
+	this->bOpen=false;
 	avcodec_close(pCodecCtx);
 	av_free(pCodecCtx);
 	pCodecCtx = XNULL;
@@ -47,7 +48,8 @@ H264Decoder::~H264Decoder() {
 	this->pPacket = XNULL;
 }
 
-H264Decoder *H264Decoder::set(int width,int height,int fps) {
+H264Decoder *H264Decoder::set(int width, int height, int fps) {
+	this->bOpen = true;
 	pCodecCtx->time_base.num = 1;
 	pCodecCtx->frame_number = 1; //每包一个视频帧
 	pCodecCtx->codec_type = AVMEDIA_TYPE_VIDEO;
@@ -92,4 +94,8 @@ void H264Decoder::decode(uchar *h264Buffer, int h264Len, int *frameFinished,
 			a += width / 2;
 		}
 	}
+}
+
+bool H264Decoder::isOpen() const{
+	return this->bOpen;
 }

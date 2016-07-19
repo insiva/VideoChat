@@ -28,23 +28,13 @@ CallManager::~CallManager() {
 	delete pRtcpRecvedFuncHandler;
 }
 
-int CallManager::makeCall(VcFriend * vf, int width, int height, int fps) {
+int CallManager::makeCall(VcFriend * vf) {
 	this->pRtpManager->connectRemote(vf->getIp(), vf->getPort());
-	int cameraParameters[3];
-	cameraParameters[0] = width;
-	cameraParameters[1] = height;
-	cameraParameters[2] = fps;
 	//const char * cc=cameraParameters;
-	int err = this->pRtpManager->sendRtcp(RtcpType::CALL_INVITE, true, 0,
-			(const uchar *) cameraParameters, sizeof(cameraParameters));
+	int err = this->pRtpManager->sendRtcp(RtcpType::CALL_INVITE, true, 0);
 	if (err == 0) {
 		DLOG("Make Call(%s:%d) Success!\n", vf->getIp(), vf->getPort());
 		this->pCurrentCall = new VcCall(vf, VcCallState::ESTABLISHING);
-		//VcManager::pInstance->sendEmptyMessage(WHAT_CALL_INVITE_SUCCESS);
-		//if (VcManager::pInstance->pCallback != XNULL) {
-		//	VcManager::pInstance->pCallback->onEstablished(this->pCurrentCall);
-		//}
-		///VcManager::pInstance->sendEmptyMessageDelay(WHAT_CALL_NO_RESPONSE_TIMEOUT, CALL_NO_RESPONSE_TIMEOUT);
 	} else {
 		VcManager::pInstance->sendEmptyMessage(WHAT_CALL_INVITE_FAIL);
 		if (VcManager::pInstance->pCallback != XNULL) {
@@ -92,6 +82,9 @@ void CallManager::onRtcpPacketRecved(RtcpPacket *rcp, void *invoker) {
 		case RtcpType::CALL_REJECT:
 			callManager->onCallReject(rcp);
 			break;
+		case RtcpType::CALL_CAMERA_PARAMETERS:
+			callManager->onCallCameraParameters(rcp);
+			break;
 		}
 	}
 }
@@ -132,9 +125,6 @@ void CallManager::onCallInvite(RtcpPacket *rcp) {
 		} else {
 			this->pCurrentCall = new VcCall(vf, VcCallState::ESTABLISHED,
 					false);
-			const int *cameraParameters = (const int *) rcp->getExtraData();
-			VcManager::pInstance->onCallIncoming(cameraParameters[0],
-					cameraParameters[1], cameraParameters[2]);
 			if (VcManager::pInstance->pCallback != XNULL) {
 				VcManager::pInstance->pCallback->onIncoming(this->pCurrentCall);
 			}
@@ -230,4 +220,20 @@ void CallManager::hangupCall() {
 			this->releaseCall();
 		}
 	}
+}
+
+int CallManager::sendMyCameraParameters(int width, int height, int fps) const {
+	int parameters[3];
+	parameters[0] = width;
+	parameters[1] = height;
+	parameters[2] = fps;
+	int err = this->pRtpManager->sendRtcp(RtcpType::CALL_CAMERA_PARAMETERS,
+			false, 0, (const unsigned char *) parameters, sizeof(parameters));
+	return err;
+}
+
+void CallManager::onCallCameraParameters(RtcpPacket *rcp){
+	const int *cameraParameters = (const int *) rcp->getExtraData();
+	VcManager::pInstance->onRemoteCameraParametersRecved(cameraParameters[0],
+			cameraParameters[1], cameraParameters[2]);
 }

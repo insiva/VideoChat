@@ -22,7 +22,7 @@ class CallManager {
 public:
 	CallManager(RtpManager *rtpManager);
 	~CallManager();
-	int makeCall(VcFriend * vf, int width, int height, int fps);
+	int makeCall(VcFriend * vf);
 private:
 	//void setCallback(VcCallback *);
 	VcCall *pCurrentCall;
@@ -33,6 +33,8 @@ private:
 	void onCallAnswer(RtcpPacket * rcp);
 	void onCallHangup(RtcpPacket * rcp);
 	void onCallReject(RtcpPacket * rcp);
+	void onCallCameraParameters(RtcpPacket * rcp);
+	int sendMyCameraParameters(int width,int height,int fps) const;
 
 	void answerCall();
 	void rejectCall();

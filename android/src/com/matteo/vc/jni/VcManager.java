@@ -31,12 +31,16 @@ public class VcManager {
     }
   }
 
-  public int makeCall(long friendSsrc, int width, int height, int fps) {
-    return VCJNI.VcManager_makeCall(swigCPtr, this, friendSsrc, width, height, fps);
+  public int makeCall(long friendSsrc) {
+    return VCJNI.VcManager_makeCall(swigCPtr, this, friendSsrc);
   }
 
   public void addFriend(long ssrc, String ip, int port) {
     VCJNI.VcManager_addFriend(swigCPtr, this, ssrc, ip, port);
+  }
+
+  public void clearFriend() {
+    VCJNI.VcManager_clearFriend(swigCPtr, this);
   }
 
   public VcCall getCurrentCall() {
@@ -58,6 +62,18 @@ public class VcManager {
 
   public void setMyCameraParameters(int width, int height, int fps) {
     VCJNI.VcManager_setMyCameraParameters(swigCPtr, this, width, height, fps);
+  }
+
+  public void initGl(int viewWidth, int viewHeight) {
+    VCJNI.VcManager_initGl(swigCPtr, this, viewWidth, viewHeight);
+  }
+
+  public void deinitGl() {
+    VCJNI.VcManager_deinitGl(swigCPtr, this);
+  }
+
+  public void render() {
+    VCJNI.VcManager_render(swigCPtr, this);
   }
 
   public static VcManager init(String localIp, int port, long ssrc) {

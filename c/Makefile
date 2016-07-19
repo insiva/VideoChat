@@ -32,13 +32,16 @@ m1: $(ODIR)/m1.o
 m2: $(ODIR)/m2.o
 	$(CC) $(ODIR)/m2.o $(OBJS) -o $(ODIR)/m2 $(CFLAGS) $(LDFLAGS)  $(LIBS)
 	
-test2: libVideoChat.so m11 m22
+test2: subdirs m11 m22
+#	export LD_LIBRARY_PATH=$(ODIR)
 
 m11: $(ODIR)/m1.o
-	$(CC) $(ODIR)/m1.o -o $(ODIR)/m1 $(CFLAGS) $(LDFLAGS) -L$(ODIR)  $(LIBS) -lVideoChat
+#	$(CC) $(ODIR)/m1.o -o $(ODIR)/m1 $(CFLAGS) $(LDFLAGS) -L$(ODIR)  $(LIBS) -lVideoChat
+	$(CC) $(OBJS) $(ODIR)/m1.o -o $(ODIR)/m1 $(CFLAGS) $(LDFLAGS)  $(LIBS)
 	
 m22: $(ODIR)/m2.o
-	$(CC) $(ODIR)/m2.o -o $(ODIR)/m2 $(CFLAGS) $(LDFLAGS) -L$(ODIR)  $(LIBS) -lVideoChat
+#	$(CC) $(ODIR)/m2.o -o $(ODIR)/m2 $(CFLAGS) $(LDFLAGS) -L$(ODIR)  $(LIBS) -lVideoChat
+	$(CC) $(OBJS) $(ODIR)/m2.o -o $(ODIR)/m2 $(CFLAGS) $(LDFLAGS)  $(LIBS)
 	
 libVideoChat.so: o subdirs
 	$(CC) $(OBJS) -o $(SO_PATH)  $(CFLAGS) -fPIC -shared -Wl,--whole-archive $(LDFLAGS)  $(LIBS) -Wl,--no-whole-archive

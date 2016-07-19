@@ -20,22 +20,25 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libswscale/swscale.h>
-};
+}
+;
 
 class H264Decoder {
 public:
 	H264Decoder();
 	~H264Decoder();
-	H264Decoder *set(int width,int height,int fps);
-	void decode(uchar *,int,int *,uchar *);
+	H264Decoder *set(int width, int height, int fps);
+	void decode(uchar *, int, int *, uchar *);
+	bool isOpen() const;
 
 private:
-	AVCodec         *pCodec;
-	AVCodecContext  *pCodecCtx;
-	SwsContext      *img_convert_ctx;
-	AVFrame         *pFrame;
-	AVFrame         *pFrameRGB;
+	AVCodec *pCodec;
+	AVCodecContext *pCodecCtx;
+	SwsContext *img_convert_ctx;
+	AVFrame *pFrame;
+	AVFrame *pFrameRGB;
 	AVPacket *pPacket;
+	bool bOpen;
 public:
 private:
 	static void init();

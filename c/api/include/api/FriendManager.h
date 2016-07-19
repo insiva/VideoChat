@@ -14,6 +14,7 @@
 
 using namespace std;
 class FriendManager {
+	friend class VcManager;
 public:
 	FriendManager();
 	~FriendManager();

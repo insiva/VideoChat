@@ -29,6 +29,7 @@ public:
 
 	void onYv12FramePushed(uchar *yv12Frame);
 	void onH264FrameRecved(uchar *h264Buffer, size_t h264Length);
+
 private:
 	H264Encoder *pEncoder;
 	H264Decoder *pDecoder;

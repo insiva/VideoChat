@@ -32,6 +32,7 @@ void VideoManager::initEncoder(int width, int height, int fps) {
 	this->nEncodeWidth = width;
 	this->nEncodeHeight = height;
 	this->nEncodeFps = fps;
+	LOG("Encoder Init, Width=%d, Height=%d, FPS=%d.\n",width,height,fps);
 }
 
 void VideoManager::deinitEncoder() {
@@ -52,6 +53,7 @@ void VideoManager::initDecoder(int width, int height, int fps) {
 	this->nDecodeWidth = width;
 	this->nDecodeHeight = height;
 	this->nDecodeFps = fps;
+	LOG("Decoder Init, Width=%d, Height=%d, FPS=%d.\n",width,height,fps);
 #ifdef __ANDROID__
 	this->initGlHepler(this->nGlViewWidth, this->nGlViewHeight);
 #endif

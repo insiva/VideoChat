@@ -85,6 +85,10 @@ void H264Encoder::open() {
 	XASSERT(pX264Handle, "Open X264 Handle Failed!\n");
 }
 
+bool H264Encoder::isOpen() const {
+	return this->pX264Handle != XNULL;
+}
+
 void H264Encoder::close() {
 	x264_picture_clean(pPicIn);
 	//x264_picture_clean(pPicOut);

@@ -20,13 +20,14 @@ public:
 	}
 	void onIncoming(VcCall * call) {
 		LOG("Incoming Call!\n");
-		VcManager::get()->setMyCameraParameters(1280,720,30);
+		//VcManager::get()->setMyCameraParameters(1280,720,30);
 		VcManager::get()->handleCall(call, VcCallAction::CALL_ACTION_ANSWER);
 	}
 	void onDisconnect(VcCall *call) {
 		LOG("Call Disconnected!\n");
 	}
 	void onConfirmed(VcCall *call) {
+		VcManager::get()->setMyCameraParameters(1280,720,30);
 		LOG("Call Confirmed!\n");
 	}
 	void onEstablished(VcCall *call) {
@@ -47,7 +48,7 @@ void * pushFrame(void * args) {
 	int i = 0;
 
 	while (true) {
-		LOG("Read Start!\n");
+		//LOG("Read Start!\n");
 		int rFile = open("/home/zzh/video", O_RDONLY);
 		int ii = 0;
 		i++;
@@ -56,8 +57,9 @@ void * pushFrame(void * args) {
 			VcManager::get()->pushYv12Frame(buffer, bufferSize);
 			usleep(30*1000);
 		}
+		usleep(30*1000);
 		close(rFile);
-		LOG("Read End!\n");
+		//LOG("Read End!\n");
 	}
 	return XNULL;
 }

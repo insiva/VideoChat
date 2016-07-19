@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+		Copyright (C) 2010 Regis Montoya (aka r3gis - www.r3gis.fr)
+		Copyright (C) 2007-2008 Esmertec AG.
+	 	Copyright (C) 2007-2008 The Android Open Source Project
+	
+		This file is part of CSipSimple. CSipSimple is free software: you can
+		redistribute it and/or modify it under the terms of the GNU General
+		Public License as published by the Free Software Foundation, either
+		version 3 of the License, or (at your option) any later version.
+
+		CSipSimple is distributed in the hope that it will be useful, but
+		WITHOUT ANY WARRANTY; without even the implied warranty of
+		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+		General Public License for more details. You should have received a
+		copy of the GNU General Public License along with CSipSimple. If not,
+		see <http://www.gnu.org/licenses/>.
+-->
+<!-- 	Parts of this file are extract from the android project distributed under Apache license relicensed in GPLv3 -->
+<resources>
+
+    <color name="white">#FFFFFF</color>
+    <color name="bg_light_gray">#f8f8f8</color>
+    <color name="semi_white">#45FFFFFF</color>
+    <color name="orange">#FF8000</color>
+    <color name="lightblue">#33B5E5</color>
+    <color name="half_lightblue">#8033B5E5</color>
+    <color name="darkblue">#0099CC</color>
+    <color name="gray">#c0c0c0</color>
+    <color name="black">#000000</color>
+    <color name="lightgray2">#F2F2F2</color>
+    <color name="transparent">#00000000</color>
+    <color name="darkgray">#333333</color>
+    <color name="halfblack">#50000000</color>
+    <color name="halfwhite">#80ffffff</color>
+    <color name="neon_blue">#4D4DFF</color>
+    <color name="blue">#1E61AE</color>
+    <color name="green">#13a86b</color>
+    <color name="halfgreen">#8013a86b</color>
+    <color name="darkgreen">#03a456</color>
+    <color name="red">#FF0000</color>
+    <color name="darkred">#CD0000</color>
+    <color name="lightgreen">#64BD8B</color>
+    <color name="violet">#9060e8</color>
+    <color name="darkviolet">#7b52c5</color>
+    <color name="pink">#fda8b2</color>
+    <color name="darkpink">#d78f97</color>
+    <color name="grassgreen">#a6f368</color>
+    <color name="darkgrassgreen">#8dcf59</color>
+    <color name="skyblue">#84a1ea</color>
+    <color name="darkskyblue">#7089c7</color>
+    <color name="peacockblue">#41d2d8</color>
+    <color name="darkpeacockblue">#37b3b8</color>
+    <color name="setting_yellow">#f1c561</color>
+    <color name="dark_setting_yellow">#cda853</color>
+    <color name="state_green">#9ce139</color>
+    <color name="dark_state_green">#85bf31</color>
+    <color name="record_yellow">#ffad70</color>
+    <color name="dark_record_yellow">#d9935f</color>
+    <color name="disabled_gray">#b4b4b4</color>
+    <color name="logout_green">#3dc68c</color>
+    <color name="dark_logout_green">#319e70</color>
+    <color name="lightblack">#2b2c2e</color>
+    <color name="lightgray">#eeeeee</color>
+    <color name="font_gray">#666666</color>
+    <color name="font_black">#000000</color>
+    <color name="font_dark_gray">#333333</color>
+    <color name="font_light_gray">#999999</color>
+    <color name="dial_number_normal">#F4F4F4</color>
+    <color name="dial_number_pressed">#e6e4e7</color>
+</resources>

@@ -10,13 +10,17 @@ package com.matteo.vc.jni;
 
 public class VCJNI {
   public final static native int CALL_ACTION_ANSWER_get();
-  public final static native int VcManager_makeCall(long jarg1, VcManager jarg1_, long jarg2, int jarg3, int jarg4, int jarg5);
+  public final static native int VcManager_makeCall(long jarg1, VcManager jarg1_, long jarg2);
   public final static native void VcManager_addFriend(long jarg1, VcManager jarg1_, long jarg2, String jarg3, int jarg4);
+  public final static native void VcManager_clearFriend(long jarg1, VcManager jarg1_);
   public final static native long VcManager_getCurrentCall(long jarg1, VcManager jarg1_);
   public final static native void VcManager_setCallback(long jarg1, VcManager jarg1_, long jarg2, VcCallback jarg2_);
   public final static native void VcManager_handleCall(long jarg1, VcManager jarg1_, long jarg2, VcCall jarg2_, int jarg3);
   public final static native void VcManager_pushYv12Frame(long jarg1, VcManager jarg1_, String jarg2, long jarg3);
   public final static native void VcManager_setMyCameraParameters(long jarg1, VcManager jarg1_, int jarg2, int jarg3, int jarg4);
+  public final static native void VcManager_initGl(long jarg1, VcManager jarg1_, int jarg2, int jarg3);
+  public final static native void VcManager_deinitGl(long jarg1, VcManager jarg1_);
+  public final static native void VcManager_render(long jarg1, VcManager jarg1_);
   public final static native long VcManager_init__SWIG_0(String jarg1, int jarg2, long jarg3);
   public final static native long VcManager_init__SWIG_1(String jarg1, int jarg2);
   public final static native void VcManager_deinit();
@@ -26,6 +30,8 @@ public class VCJNI {
   public final static native int VcFriend_getSsrc(long jarg1, VcFriend jarg1_);
   public final static native String VcFriend_getIp(long jarg1, VcFriend jarg1_);
   public final static native int VcFriend_getPort(long jarg1, VcFriend jarg1_);
+  public final static native long VcFriend_setIp(long jarg1, VcFriend jarg1_, String jarg2);
+  public final static native long VcFriend_setPort(long jarg1, VcFriend jarg1_, int jarg2);
   public final static native int UNKNOW_get();
   public final static native int ESTABLISHING_get();
   public final static native int ESTABLISHED_get();

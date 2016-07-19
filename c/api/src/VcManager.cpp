@@ -43,6 +43,10 @@ void VcManager::addFriend(uint ssrc, const char *ip, ushort port) {
 	this->pFriendManager->addFriend(ssrc, ip, port);
 }
 
+void VcManager::clearFriend() {
+	this->pFriendManager->pFriends->clear();
+}
+
 VcCall *VcManager::getCurrentCall() const {
 	return this->pCallManager->pCurrentCall;
 }
@@ -51,16 +55,13 @@ void VcManager::setCallback(VcCallback *callback) {
 	this->pCallback = callback;
 }
 
-int VcManager::makeCall(uint friendSsrc, int width, int height, int fps) {
+int VcManager::makeCall(uint friendSsrc) {
 	VcFriend *vf = this->pFriendManager->findFriend(friendSsrc);
 	if (vf == XNULL) {
 		LOG("No friend Ssrc=%d\n", friendSsrc);
 		return ERROR_NO_FRIEND_FOUND;
 	}
-	int err = this->pCallManager->makeCall(vf, width, height, fps);
-	if (err >= 0) {
-		this->setMyCameraParameters(width, height, fps);
-	}
+	int err = this->pCallManager->makeCall(vf);
 	return err;
 }
 
@@ -120,7 +121,7 @@ void VcManager::onCallFinished() {
 	this->pVideoManager->deinitEncoder();
 	this->pVideoManager->deinitDecoder();
 }
-void VcManager::onCallIncoming(int width, int height, int fps) {
+void VcManager::onRemoteCameraParametersRecved(int width, int height, int fps) {
 	this->setRemoteCameraParameters(width, height, fps);
 	DLOG(
 			"Call Incoming, Camera Parameters: Width = %d, Height =%d, FPS = %d.\n",
@@ -128,20 +129,24 @@ void VcManager::onCallIncoming(int width, int height, int fps) {
 }
 
 void VcManager::pushYv12Frame(char *buffer, size_t length) {
-	if (this->pCallManager->pCurrentCall != XNULL
-			&& this->pCallManager->pCurrentCall->mState
-					== VcCallState::CONFIRMED) {
+	if (this->pVideoManager->pEncoder->isOpen()) {
 		this->pVideoManager->onYv12FramePushed((uchar *) buffer);
 	}
 }
 
 void VcManager::onDataPacketRecved(DataPacket *dp) {
-	this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),
-			dp->getLength());
+	if (this->pCallManager->pCurrentCall != XNULL
+			&& this->pCallManager->pCurrentCall->mState
+					== VcCallState::CONFIRMED
+			&& this->pVideoManager->pDecoder->isOpen()) {
+		this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),
+				dp->getLength());
+	}
 }
 
 void VcManager::setMyCameraParameters(int width, int height, int fps) {
 	this->pVideoManager->initEncoder(width, height, fps);
+	this->pCallManager->sendMyCameraParameters(width, height, fps);
 }
 
 void VcManager::setRemoteCameraParameters(int width, int height, int fps) {

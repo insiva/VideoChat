@@ -16,8 +16,13 @@ FriendManager::~FriendManager() {
 }
 
 void FriendManager::addFriend(uint ssrc, const char *ip, ushort port) {
-	VcFriend * vf = new VcFriend(ssrc, ip, port);
-	this->pFriends->push_back(vf);
+	VcFriend * vf = this->findFriend(ssrc);
+	if(vf==XNULL){
+		vf=new VcFriend(ssrc, ip, port);
+		this->pFriends->push_back(vf);
+	}else{
+		vf->setIp(ip)->setPort(port);
+	}
 }
 
 VcFriend *FriendManager::findFriend(uint ssrc) const {

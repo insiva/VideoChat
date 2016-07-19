@@ -27,7 +27,7 @@ public:
 	void close();
 	H264Encoder *set(int, int,int,int);
 	int encode(x264_nal_t **, int *, uchar *);
-
+	bool isOpen() const;
 	static void yv12ToI420(uchar *,const uchar *,int,int);
 
 private:

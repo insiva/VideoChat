@@ -29,3 +29,15 @@ const char *VcFriend::getIp() const {
 ushort VcFriend::getPort() const {
 	return this->mPort;
 }
+
+VcFriend *VcFriend::setIp(const char *ip) {
+	delete[] pIp;
+	this->pIp = new char[strlen(ip) + 1];
+	strcpy(this->pIp, ip);
+	return this;
+}
+
+VcFriend *VcFriend::setPort(unsigned short port) {
+	this->mPort = port;
+	return this;
+}

@@ -51,4 +51,14 @@ public class VcFriend {
     return VCJNI.VcFriend_getPort(swigCPtr, this);
   }
 
+  public VcFriend setIp(String ip) {
+    long cPtr = VCJNI.VcFriend_setIp(swigCPtr, this, ip);
+    return (cPtr == 0) ? null : new VcFriend(cPtr, false);
+  }
+
+  public VcFriend setPort(int port) {
+    long cPtr = VCJNI.VcFriend_setPort(swigCPtr, this, port);
+    return (cPtr == 0) ? null : new VcFriend(cPtr, false);
+  }
+
 }

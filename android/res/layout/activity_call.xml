@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/flCall"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <!--
+    <com.matteo.vc.ui.view.GlView
+        android:id="@+id/gvRemote"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <SurfaceView
+        android:id="@+id/svLocal"
+        android:layout_width="240dp"
+        android:layout_height="260dp"
+        android:layout_gravity="right|top" />
+    -->
+
+    <RelativeLayout
+        android:id="@+id/rlCallControl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black" >
+
+        <TextView
+            android:id="@+id/tvFriend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:background="@color/transparent"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+
+        <TextView
+            android:id="@+id/tvState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvFriend"
+            android:layout_centerHorizontal="true"
+            android:background="@color/transparent"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+
+        <LinearLayout
+            android:id="@+id/llIncoming"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="30dp"
+            android:background="@color/transparent"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/ivAnswer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="30dp"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:contentDescription="@string/default_content_description"
+                android:src="@drawable/answer_selector" />
+
+            <ImageView
+                android:id="@+id/ivReject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:contentDescription="@string/default_content_description"
+                android:src="@drawable/hangup_selector" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/llOutgoing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="30dp"
+            android:background="@color/transparent"
+            android:gravity="center"
+            android:orientation="horizontal" >
+
+            <ImageView
+                android:id="@+id/ivHangup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@android:color/transparent"
+                android:clickable="true"
+                android:contentDescription="@string/default_content_description"
+                android:src="@drawable/hangup_selector" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

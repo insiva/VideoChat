@@ -6,7 +6,11 @@
     -->
 
     <!-- Application theme. -->
-    <style name="AppTheme">
+        <!-- Application theme. -->
+    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
+        <item name="android:background">@color/white</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowSoftInputMode">stateHidden|stateAlwaysHidden</item>
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
 

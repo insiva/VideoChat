@@ -17,6 +17,8 @@ public:
 	int getSsrc() const;
 	const char *getIp() const;
 	unsigned short getPort() const;
+	VcFriend *setIp(const char *ip);
+	VcFriend *setPort(unsigned short port);
 private:
 	unsigned int mSsrc;
 	char * pIp;

@@ -13,8 +13,7 @@ all: dir vc.i objs
 objs: dir vc.i $(ODIR)/swig.o
 
 vc.i:
-	swig -c++ -java -package $(JAVA_PACKAGE) -outdir $(SWIG_OUT_DIR) -o $(SDIR)/swig.cpp -I$(APIDIR)/include  $(MYDIR)/vc.i
-
+	swig  -D__ANDROID__ -c++ -java -package $(JAVA_PACKAGE) -outdir $(SWIG_OUT_DIR) -o $(SDIR)/swig.cpp -I$(APIDIR)/include  $(MYDIR)/vc.i
 dir:
 	@if [ ! -d $(SWIG_OUT_DIR) ];then mkdir $(SWIG_OUT_DIR); fi
 	@if [ ! -d $(SDIR) ];then mkdir $(SDIR); fi

@@ -1,7 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-
     <string name="app_name">VideoChat</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="default_content_description">Hello world!</string>
+    <string name="outgo_failed">呼叫失败！</string>
+    <string name="outgoing">正在呼叫...</string>
+    <string name="incoming">正在来电...</string>
+    <string name="call_disconnect">通话结束</string>
 </resources>

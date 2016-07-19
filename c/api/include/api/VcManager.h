@@ -30,8 +30,9 @@ private:
 	~VcManager();
 
 public:
-	int makeCall(unsigned int friendSsrc, int width, int height, int fps);
+	int makeCall(unsigned int friendSsrc);
 	void addFriend(unsigned int ssrc, const char * ip, unsigned short port);
+	void clearFriend();
 	VcCall *getCurrentCall() const;
 	void setCallback(VcCallback *);
 	void handleCall(VcCall *call, VcCallAction action);
@@ -52,7 +53,7 @@ private:
 	void handleMessage(XMessage *);
 	void onDataPacketRecved(DataPacket *);
 	void onCallFinished();
-	void onCallIncoming(int width, int height, int fps);
+	void onRemoteCameraParametersRecved(int width, int height, int fps);
 	void setRemoteCameraParameters(int width, int height, int fps);
 	//void onRtcpPacketRecved(RtcpPacket *);
 

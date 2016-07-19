@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="matteo">
+        <attr name="showReturn" format="boolean" />
+        <attr name="showState" format="boolean" />
+        <attr name="text" format="reference" />
+        <attr name="actionSrc" format="reference" />
+        <attr name="inScrollView" format="boolean" />
+        <attr name="hasDivider" format="boolean" />
+        <attr name="dtmfNumber" format="string" />
+    </declare-styleable>
+
+</resources>
