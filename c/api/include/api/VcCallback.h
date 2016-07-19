@@ -22,6 +22,7 @@ public:
 	virtual void onOutgoFail(VcCall *){};
 	virtual void onTimeout(VcCall *){};
 	virtual void onDisconnect(VcCall *){};
+	virtual void onRemoteCameraParametersRecved(int width,int height,int fps){};
 };
 
 #endif /* INCLUDE_API_VCCALLBACK_H_ */

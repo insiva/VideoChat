@@ -15,15 +15,15 @@
 #define RTCP_PACKET_SIZE UDP_MTU_SIZE
 
 typedef struct _RtcpHeader {
-	uint mFromIp;
-	ushort mFromPort;
+	uint mFromIp;//4
+	ushort mFromPort;//2
 	unsigned mType :6;
 	unsigned bIsFeedback :1;
-	unsigned mNeedFeedback :1;
-	uint mSsrc;
-	uint mSequence;
-	uint mMilliSeconds;
-	uchar mExtraDataLength;
+	unsigned mNeedFeedback :1;//1
+	uint mSsrc;//4
+	uint mSequence;//4
+	uint mMilliSeconds;//4
+	uchar mExtraDataLength;//1
 } RtcpHeader;
 
 class RtcpPacket {

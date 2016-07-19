@@ -77,12 +77,26 @@ void VcManager::handleCall(VcCall *call, VcCallAction action) {
 }
 
 void VcManager::handleMessage(XMessage *msg) {
+	uchar *buffer =XNULL;
 	switch (msg->getWhat()) {
 	case WHAT_CALL_NO_RESPONSE_TIMEOUT:
 		this->asyncCallTimeout();
 		break;
 	case WHAT_CALL_ACTION:
 		this->asyncHandleCall(msg);
+		break;
+	case WHAT_NEW_YV12_FRAME_PUSHED:
+		buffer = (uchar *) msg->getData();
+		this->pVideoManager->onYv12FramePushed(buffer + sizeof(size_t));
+		delete[] buffer;
+		buffer=XNULL;
+		break;
+	case WHAT_NEW_H264_FRAME_RECVED:
+		buffer = (uchar *)  msg->getData();
+		size_t length = *((size_t *) buffer);
+		this->pVideoManager->onH264FrameRecved(buffer + sizeof(size_t), length);
+		delete[] buffer;
+		buffer=XNULL;
 		break;
 	}
 }
@@ -98,7 +112,6 @@ void VcManager::asyncCallTimeout() {
 		}
 		this->pCallManager->releaseCall();
 	}
-	this->onCallFinished();
 }
 
 void VcManager::asyncHandleCall(XMessage *msg) {
@@ -118,29 +131,48 @@ void VcManager::asyncHandleCall(XMessage *msg) {
 }
 
 void VcManager::onCallFinished() {
+	DLOG(" VcManager::onCallFinished1\n");
 	this->pVideoManager->deinitEncoder();
 	this->pVideoManager->deinitDecoder();
+	DLOG(" VcManager::onCallFinished2\n");
 }
 void VcManager::onRemoteCameraParametersRecved(int width, int height, int fps) {
 	this->setRemoteCameraParameters(width, height, fps);
+	if (this->pCallback != XNULL) {
+		this->pCallback->onRemoteCameraParametersRecved(width, height, fps);
+	}
 	DLOG(
 			"Call Incoming, Camera Parameters: Width = %d, Height =%d, FPS = %d.\n",
 			width, height, fps);
 }
 
 void VcManager::pushYv12Frame(char *buffer, size_t length) {
-	if (this->pVideoManager->pEncoder->isOpen()) {
+	if (this->pCallManager->pCurrentCall != XNULL
+			&& this->pCallManager->pCurrentCall->mState
+					== VcCallState::CONFIRMED) {
 		this->pVideoManager->onYv12FramePushed((uchar *) buffer);
+		/*
+		uchar *newBuffer = new uchar[sizeof(size_t) + length];
+		memcpy(newBuffer, &length, sizeof(size_t));
+		memcpy(newBuffer + sizeof(size_t), buffer, length);
+		XMessage *msg = XMessage::obtain(WHAT_NEW_YV12_FRAME_PUSHED, newBuffer);
+		*/
 	}
 }
 
 void VcManager::onDataPacketRecved(DataPacket *dp) {
 	if (this->pCallManager->pCurrentCall != XNULL
 			&& this->pCallManager->pCurrentCall->mState
-					== VcCallState::CONFIRMED
-			&& this->pVideoManager->pDecoder->isOpen()) {
-		this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),
-				dp->getLength());
+					== VcCallState::CONFIRMED) {
+		this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),dp->getLength());
+		/*
+		uchar *buffer = dp->getBuffer();
+		size_t length = dp->getLength();
+		uchar *newBuffer = new uchar[sizeof(size_t) + length];
+		memcpy(newBuffer, &length, sizeof(size_t));
+		memcpy(newBuffer + sizeof(size_t), buffer, length);
+		XMessage *msg = XMessage::obtain(WHAT_NEW_H264_FRAME_RECVED, newBuffer);
+		*/
 	}
 }
 

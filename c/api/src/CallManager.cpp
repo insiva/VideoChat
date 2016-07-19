@@ -45,13 +45,13 @@ int CallManager::makeCall(VcFriend * vf) {
 }
 
 void CallManager::releaseCall() {
+	VcManager::pInstance->onCallFinished();
 	if (this->pCurrentCall != XNULL) {
 		delete this->pCurrentCall;
 	}
 	this->pCurrentCall = XNULL;
 	this->pRtpManager->disconnectRemote();
-
-	VcManager::pInstance->onCallFinished();
+	DLOG("releaseCall\n");
 }
 
 void CallManager::onDataPacketRecved(DataPacket *dp, void *invoker) {
@@ -65,6 +65,7 @@ void CallManager::onDataPacketRecved(DataPacket *dp, void *invoker) {
 }
 
 void CallManager::onRtcpPacketRecved(RtcpPacket *rcp, void *invoker) {
+	DLOG("CallManager::onRtcpPacketRecved\n");
 	CallManager *callManager = (CallManager *) invoker;
 	if (rcp->isFeedback()) {
 		callManager->onRtcpFeedback(rcp);
@@ -115,6 +116,7 @@ void CallManager::onRtcpFeedback(RtcpPacket *rcp) {
 }
 
 void CallManager::onCallInvite(RtcpPacket *rcp) {
+	DLOG("onCallInvite start\n");
 	if (this->pCurrentCall != XNULL) {
 		this->pRtpManager->sendRtcp(RtcpType::CALL_REJECT, false);
 	} else {
@@ -214,6 +216,7 @@ void CallManager::hangupCall() {
 		if (err == 0) {
 			this->pCurrentCall->mState = VcCallState::DISCONNECT;
 			if (VcManager::pInstance->pCallback != XNULL) {
+				DLOG("hangupCall12:%d\n",VcManager::pInstance->pCallback);
 				VcManager::pInstance->pCallback->onDisconnect(
 						this->pCurrentCall);
 			}

@@ -16,6 +16,9 @@ import com.matteo.vc.model.AccountInfo;
 import com.matteo.vc.util.XUtils;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 public class FriendManager {
@@ -63,6 +66,12 @@ public class FriendManager {
 		}
 		return null;
 	}
+	
+	public void broadcastSsrc(){
+		if(this.mUdpServer.mBroadcastThread.mBroadcastHandler!=null){
+			this.mUdpServer.mBroadcastThread.mBroadcastHandler.sendEmptyMessage(0);
+		}
+	}
 
 	public static FriendManager get() {
 		return mInstance;
@@ -78,6 +87,7 @@ public class FriendManager {
 	
 	class BroadcastThread extends Thread{
 		private boolean mIsRun;
+		private Handler mBroadcastHandler;
 		
 		BroadcastThread(){
 			mIsRun=true;
@@ -119,14 +129,16 @@ public class FriendManager {
 		
 		@Override
 		public void run() {
-			while (this.mIsRun) {
-				this.broadcast();
-				try {
-					Thread.sleep(30000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+			Looper.prepare();
+			this.broadcast();
+			this.mBroadcastHandler=new Handler(){
+				@Override
+				public void handleMessage(Message msg) {
+					super.handleMessage(msg);
+					broadcast();
 				}
-			}
+			};
+			Looper.loop();
 		}
 	}
 

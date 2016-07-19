@@ -40,6 +40,7 @@ private:
 	int nDecodeWidth, nDecodeHeight;
 	int nDecodeFps;
 	RtpManager *pRtpManager;
+	pthread_mutex_t mLock;// = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef __ANDROID__
 	void initGlHepler(int viewWidth, int viewHeight);

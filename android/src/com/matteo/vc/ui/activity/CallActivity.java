@@ -48,10 +48,6 @@ public class CallActivity extends Activity implements OnClickListener {
 		}
 	};
 
-	// private VcManager mVcManager;
-	// private VcCall mCurrentCall;
-	//private GlView gvRemote;
-	//private SurfaceView svLocal;
 	private RelativeLayout rlCallControl;
 	private TextView tvFriend;
 	private TextView tvState;
@@ -130,7 +126,8 @@ public class CallActivity extends Activity implements OnClickListener {
 
 	private void onCallDisconnect() {
 		if(this.mVideoView!=null){
-			this.mVideoView.setVisibility(View.GONE);
+			//this.mVideoView.setVisibility(View.GONE);
+			this.mVideoView.hide();
 		}
 		this.rlCallControl.setVisibility(View.VISIBLE);
 		this.llIncoming.setVisibility(View.GONE);
@@ -175,13 +172,21 @@ public class CallActivity extends Activity implements OnClickListener {
 			break;
 		}
 	}
-
+	
 	public static void startActivity(Context context, int ssrc,
-			boolean isOutgoCall) {
+			boolean isOutgoCall,boolean newTask) {
 		Intent intent = new Intent(context, CallActivity.class);
 		intent.putExtra(SSRC_KEY, ssrc);
 		intent.putExtra(IS_OUTGO_CALL_KEY, isOutgoCall);
+		if(newTask){
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		}
 		context.startActivity(intent);
+	}
+
+	public static void startActivity(Context context, int ssrc,
+			boolean isOutgoCall) {
+		CallActivity.startActivity(context, ssrc, isOutgoCall,false);
 	}
 
 	class CallStateReceiver extends BroadcastReceiver {

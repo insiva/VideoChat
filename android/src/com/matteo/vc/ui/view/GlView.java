@@ -54,6 +54,7 @@ public class GlView  extends GLSurfaceView {
 
 		@Override
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
+			Log.i(TAG, String.format("Thread ID:%d\n",Thread.currentThread().getId()));
 			VcManager.get().initGl(width, height);
 		}
 

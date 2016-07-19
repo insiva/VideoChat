@@ -54,7 +54,6 @@ void RtpManager::disconnectRemote() {
 
 int RtpManager::sendRtp(RtpType rt, const uchar *buffer, size_t len) {
 	XASSERT(this->pSendManager != XNULL, "SendManager not inited.");
-
 	ushort packetCount = ceil((double) len / (double) RTP_DATA_MAX_SIZE);
 	if (packetCount > SUB_PACKET_MAX_COUNT) {
 		LOG("This RtpData (Size = %d) is Too Big!\n", len);
@@ -159,6 +158,7 @@ inline void RtpManager::invokeDataPacketRecvedFunc() {
 }
 
 void RtpManager::onRtcpPacketRecved(RtcpPacket *rcp) {
+	DLOG("onRtcpPacketRecved RECV start\n");
 	if (this->pRtcpRecvedFuncHandler != XNULL) {
 		this->pRtcpRecvedFuncHandler->pFunc(rcp,
 				this->pRtcpRecvedFuncHandler->pInvoker);

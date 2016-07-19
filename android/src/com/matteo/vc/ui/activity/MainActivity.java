@@ -46,7 +46,11 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		this.refreshFriends();
+		//this.refreshFriends();
+		//FriendManager.get().
+		if(FriendManager.get()!=null){
+			FriendManager.get().broadcastSsrc();
+		}
 	}
 
 	@Override

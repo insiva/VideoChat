@@ -73,13 +73,10 @@ int UdpListener::listen() {
 			err = recvfrom(this->mSocketFd, this->mBuffer, this->mBufferSize, 0,
 					&fromAddr, &len);
 			//LOG("Data Recved::%d.\n", this->mBufferSize);
-			//LOG(this->mBuffer);
 			if (err < 0) {
 				LOG("Data recved error:%d,%s\n", err, gai_strerror(err));
 				break;
 			} else {
-				//dataLen=234;
-				LOG("Data Recved, Length=%u.\n", err);
 				if (this->pDataRecvedFuncHandler != 0) {
 					this->pDataRecvedFuncHandler->pFunc(this->mBuffer, err,
 							&fromAddr, this->pDataRecvedFuncHandler->pInvoker);

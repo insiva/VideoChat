@@ -49,8 +49,8 @@ ifneq ('$(DEBUG)','1')
 	$(STRIP) $(SO_PATH)
 endif
 ifeq ('$(ANDROID)','1')
-	cp $(SO_PATH) $(ARM_PATH)
-	cp $(SO_PATH) $(ARMV7A_SO_PATH)
+#	cp -f $(SO_PATH) $(ARM_PATH)
+	cp -f $(SO_PATH) $(ARMV7A_SO_PATH)
 endif
 
 subdirs:
@@ -71,5 +71,6 @@ clean:
 	rm -f $(ODIR)/*
 	rm -f $(SO_PATH)
 ifeq ('$(ANDROID)','1')
-	rm -f $(V7A_SO_PATH)
+	rm -f $(ARM_PATH)
+	rm -f $(ARMV7A_SO_PATH)
 endif

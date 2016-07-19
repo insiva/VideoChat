@@ -78,6 +78,7 @@ void RtpRecvManager::onRtcpDataRecved(const char *buffer, size_t len,
 	if (err < 0) {
 		return;
 	}
+	DLOG("Rtcp RECV start\n");
 	if (rcp->needFeedback()) {
 		rrManager->pRtcpFeedbackSocket->set(rcp->getFromIp(),
 				rcp->getFromPort(), false);
@@ -96,4 +97,5 @@ void RtpRecvManager::onRtcpDataRecved(const char *buffer, size_t len,
 	manager->pRtpManager->onRtcpPacketRecved(rcp);
 	//delete rcp;
 	rcp->recycle();
+	DLOG("Rtcp RECV end\n");
 }

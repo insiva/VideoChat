@@ -7,6 +7,7 @@
 
 #include<android/GlHelper.h>
 #include<string.h>
+#include<pthread.h>
 
 GlHelper::GlHelper(int viewWidth, int viewHeight, int videoWidth,
 		int videoHeight) :
@@ -33,6 +34,7 @@ GlHelper::~GlHelper() {
 }
 
 void GlHelper::init() {
+	DLOG("ThreadID:%d\n",pthread_self());
 	gProgram = GlHelper::createProgram(VERTEX_SHADER, FRAG_SHADER);
 	if (!gProgram) {
 		LOGE("Could not create program.");

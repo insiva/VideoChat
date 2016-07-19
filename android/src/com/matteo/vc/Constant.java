@@ -14,6 +14,7 @@ public interface Constant {
 
 		public static final String NEW_FRIEND = "com.matteo.vc.action.NEW_FRIEND";
 		public static final String CALL_STATE = "com.matteo.vc.action.CALL_STATE";
+		public static final String REMOTE_CAMERA_PARAMETERS = "com.matteo.vc.action.REMOTE_CAMERA_PARAMETERS";
 	}
 
 	public interface CallAction {
@@ -30,4 +31,8 @@ public interface Constant {
 		public static final int DISCONNECTED=4;
 		public static final String KEY="call_state";
 	}
+	
+	public static final String KEY_WIDTH="width";
+	public static final String KEY_HEIGHT="height";
+	public static final String KEY_FPS="fps";
 }

@@ -36,6 +36,7 @@ private:
 	x264_param_t *pX264Param;
 	x264_picture_t *pPicIn;
 	x264_picture_t *pPicOut;
+	bool bIsOpen;
 };
 
 #endif /* INCLUDE_XLIB_X264ENCODER_H_ */

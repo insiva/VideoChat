@@ -74,6 +74,10 @@ public class VcCallback {
     if (getClass() == VcCallback.class) VCJNI.VcCallback_onDisconnect(swigCPtr, this, VcCall.getCPtr(arg0), arg0); else VCJNI.VcCallback_onDisconnectSwigExplicitVcCallback(swigCPtr, this, VcCall.getCPtr(arg0), arg0);
   }
 
+  public void onRemoteCameraParametersRecved(int width, int height, int fps) {
+    if (getClass() == VcCallback.class) VCJNI.VcCallback_onRemoteCameraParametersRecved(swigCPtr, this, width, height, fps); else VCJNI.VcCallback_onRemoteCameraParametersRecvedSwigExplicitVcCallback(swigCPtr, this, width, height, fps);
+  }
+
   public VcCallback() {
     this(VCJNI.new_VcCallback(), true);
     VCJNI.VcCallback_director_connect(this, swigCPtr, swigCMemOwn, true);

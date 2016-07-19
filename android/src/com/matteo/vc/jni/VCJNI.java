@@ -57,6 +57,8 @@ public class VCJNI {
   public final static native void VcCallback_onTimeoutSwigExplicitVcCallback(long jarg1, VcCallback jarg1_, long jarg2, VcCall jarg2_);
   public final static native void VcCallback_onDisconnect(long jarg1, VcCallback jarg1_, long jarg2, VcCall jarg2_);
   public final static native void VcCallback_onDisconnectSwigExplicitVcCallback(long jarg1, VcCallback jarg1_, long jarg2, VcCall jarg2_);
+  public final static native void VcCallback_onRemoteCameraParametersRecved(long jarg1, VcCallback jarg1_, int jarg2, int jarg3, int jarg4);
+  public final static native void VcCallback_onRemoteCameraParametersRecvedSwigExplicitVcCallback(long jarg1, VcCallback jarg1_, int jarg2, int jarg3, int jarg4);
   public final static native long new_VcCallback();
   public final static native void delete_VcCallback(long jarg1);
   public final static native void VcCallback_director_connect(VcCallback obj, long cptr, boolean mem_own, boolean weak_global);
@@ -80,6 +82,9 @@ public class VCJNI {
   }
   public static void SwigDirector_VcCallback_onDisconnect(VcCallback jself, long arg0) {
     jself.onDisconnect((arg0 == 0) ? null : new VcCall(arg0, false));
+  }
+  public static void SwigDirector_VcCallback_onRemoteCameraParametersRecved(VcCallback jself, int width, int height, int fps) {
+    jself.onRemoteCameraParametersRecved(width, height, fps);
   }
 
   private final static native void swig_module_init();

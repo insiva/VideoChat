@@ -13,6 +13,7 @@ VideoManager::VideoManager(RtpManager * rtpManager) :
 				0), nDecodeWidth(0), nDecodeHeight(0), nDecodeFps(0) {
 	this->pEncoder = new H264Encoder();
 	this->pDecoder = new H264Decoder();
+	pthread_mutex_init(&mLock, XNULL);
 #ifdef __ANDROID__
 	nGlViewWidth=0;
 	nGlViewHeight=0;
@@ -21,45 +22,67 @@ VideoManager::VideoManager(RtpManager * rtpManager) :
 }
 
 VideoManager::~VideoManager() {
+	pthread_mutex_destroy(&mLock);
 	delete this->pEncoder;
 	delete this->pDecoder;
 }
 
 void VideoManager::initEncoder(int width, int height, int fps) {
+	pthread_mutex_lock(&mLock);
 	this->pEncoder->set(width, height, fps, VIDEO_BITRATE);
 	this->pEncoder->open();
-	this->pEncodeI420Buffer = new uchar[width * height * 3 / 2];
+	if (this->pEncodeI420Buffer == XNULL) {
+		this->pEncodeI420Buffer = new uchar[width * height * 3 / 2];
+	} else {
+		DLOG("memset2:%d\n", pEncodeI420Buffer);
+		memset(this->pEncodeI420Buffer, 0, width * height * 3 / 2);
+		DLOG("memset2:%d\n", pEncodeI420Buffer);
+	}
 	this->nEncodeWidth = width;
 	this->nEncodeHeight = height;
 	this->nEncodeFps = fps;
-	LOG("Encoder Init, Width=%d, Height=%d, FPS=%d.\n",width,height,fps);
+	pthread_mutex_unlock(&mLock);
+	LOG("Encoder Init, Width=%d, Height=%d, FPS=%d.\n", width, height, fps);
 }
 
 void VideoManager::deinitEncoder() {
+	DLOG("deinitEncoder1c\n");
+	pthread_mutex_lock(&mLock);
 	this->pEncoder->close();
-	if (this->pEncodeI420Buffer != XNULL) {
-		delete[] this->pEncodeI420Buffer;
-		this->pEncodeI420Buffer = XNULL;
-	}
+	DLOG("deinitEncoder11\n");
+	/*
+	 if (this->pEncodeI420Buffer != XNULL) {
+	 delete[] this->pEncodeI420Buffer;
+	 DLOG("deinitEncoder112\n");
+	 this->pEncodeI420Buffer = XNULL;
+	 }*/
+	this->pEncodeI420Buffer = XNULL;
+	DLOG("deinitEncoder12\n");
 	this->nEncodeWidth = 0;
 	this->nEncodeHeight = 0;
 	this->nEncodeFps = 0;
+	pthread_mutex_unlock(&mLock);
+	DLOG("deinitEncoder2\n");
 }
 
 void VideoManager::initDecoder(int width, int height, int fps) {
+	pthread_mutex_lock(&mLock);
 	this->pDecoder->set(width, height, fps);
 	this->pDecodeYv12Buffer = new uchar[width * height * 3 / 2];
 	this->pDecodeI420Buffer = new uchar[width * height * 3 / 2];
 	this->nDecodeWidth = width;
 	this->nDecodeHeight = height;
 	this->nDecodeFps = fps;
-	LOG("Decoder Init, Width=%d, Height=%d, FPS=%d.\n",width,height,fps);
+	pthread_mutex_unlock(&mLock);
+	LOG("Decoder Init, Width=%d, Height=%d, FPS=%d.\n", width, height, fps);
 #ifdef __ANDROID__
-	this->initGlHepler(this->nGlViewWidth, this->nGlViewHeight);
+	//this->initGlHepler(this->nGlViewWidth, this->nGlViewHeight);
 #endif
 }
 
 void VideoManager::deinitDecoder() {
+	DLOG("deinitDecoder1\n");
+	pthread_mutex_lock(&mLock);
 	if (this->pDecodeYv12Buffer != XNULL) {
 		delete[] this->pDecodeYv12Buffer;
 		this->pDecodeYv12Buffer = XNULL;
@@ -69,22 +92,30 @@ void VideoManager::deinitDecoder() {
 	this->nDecodeWidth = 0;
 	this->nDecodeHeight = 0;
 	this->nDecodeFps = 0;
+	pthread_mutex_unlock(&mLock);
+	DLOG("deinitDecoder2\n");
 }
 
 void VideoManager::onYv12FramePushed(uchar *yv12Frame) {
-	VideoManager::yv12ToI420(this->pEncodeI420Buffer, yv12Frame,
-			this->nEncodeWidth, this->nEncodeHeight);
+	DLOG("onYv12FramePushed1.\n");
 	x264_nal_t *nals;
 	int nnal;
+	pthread_mutex_lock(&mLock);
+	if (!this->pEncoder->isOpen()) {
+		return;
+	}
+	VideoManager::yv12ToI420(this->pEncodeI420Buffer, yv12Frame,
+			this->nEncodeWidth, this->nEncodeHeight);
 	int fs = this->pEncoder->encode(&nals, &nnal, this->pEncodeI420Buffer);
+	DLOG("onYv12FramePushed2.\n");
 	if (fs > 0) {
 		for (int i = 0; i < nnal; ++i) { //将编码数据写入文件.
-			LOG("A Pushed Frame Encoded, Index=%d, Size=%d.\n", i,
-					nals[i].i_payload);
+			//LOG("A Pushed Frame Encoded, Index=%d, Size=%d.\n", i,nals[i].i_payload);
 			this->pRtpManager->sendRtp(RtpType::H264,
 					(uchar *) nals[i].p_payload, nals[i].i_payload);
 		}
 	}
+	pthread_mutex_unlock(&mLock);
 }
 
 void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
@@ -95,6 +126,10 @@ void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
 #endif
 
 	int frameFinished = 0;
+	pthread_mutex_lock(&mLock);
+	if (!this->pDecoder->isOpen()) {
+		return;
+	}
 	this->pDecoder->decode((uchar *) h264Buffer, h264Length, &frameFinished,
 			this->pDecodeI420Buffer);
 	if (frameFinished) {
@@ -109,6 +144,7 @@ void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
 		 this->mDecodeHeight);
 		 */
 	}
+	pthread_mutex_unlock(&mLock);
 
 }
 
@@ -134,13 +170,14 @@ void VideoManager::i420ToYv12(uchar *yv12Buffer, const uchar *i420Buffer,
 void VideoManager::initGlHepler(int viewWidth, int viewHeight) {
 	this->nGlViewWidth = viewWidth;
 	this->nGlViewHeight = viewHeight;
+	XASSERT(nGlViewWidth>0&&nDecodeWidth>0,"Local < 0 or Remote < 0\n");
+	if (this->pGlHelper != XNULL) {
+		delete this->pGlHelper;
+		this->pGlHelper = XNULL;
+	}
+	this->pGlHelper = new GlHelper(this->nGlViewWidth, this->nGlViewHeight,
+			this->nDecodeWidth, this->nDecodeHeight);
 	if (this->nGlViewWidth > 0 && this->nDecodeWidth > 0) {
-		if (this->pGlHelper != XNULL) {
-			delete this->pGlHelper;
-			this->pGlHelper = XNULL;
-		}
-		this->pGlHelper = new GlHelper(this->nGlViewWidth, this->nGlViewHeight,
-				this->nDecodeWidth, this->nDecodeHeight);
 	}
 }
 

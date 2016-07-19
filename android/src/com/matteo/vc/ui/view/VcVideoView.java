@@ -1,15 +1,20 @@
 package com.matteo.vc.ui.view;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
+import com.matteo.vc.Constant;
 import com.matteo.vc.R;
 import com.matteo.vc.jni.VC;
+import com.matteo.vc.jni.VcCall;
 import com.matteo.vc.jni.VcCallAction;
 import com.matteo.vc.jni.VcManager;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.hardware.Camera.PreviewCallback;
@@ -25,11 +30,13 @@ import android.widget.ImageView;
 
 public class VcVideoView extends FrameLayout implements OnClickListener,
 		SurfaceHolder.Callback, PreviewCallback {
-	static final String TAG="VcVideoView";
+	static final String TAG = "VcVideoView";
 	static final int LOCAL_SV_WIDTH = 240;
 	static final int LOCAL_SV_HEIGHT = 450;
 	static final int CAMERA_FPS = 16;
+	// private VcCall mCall;
 
+	private Context mContext;
 	private Camera mCamera;
 	private SurfaceHolder mSurfaceHolder;
 
@@ -38,15 +45,20 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 	private ImageView ivHangup;
 	private int mPreviewWidth, mPreviewHeight;
 	private int mPreviewFps;
+	private boolean mHasSetMyCameraParameters, mHasRecvRemoteCameraParameters;
+	private RemoteCameraParametersReceiver mRemoteCameraParametersReceiver;
 
 	public VcVideoView(Context context) {
 		super(context);
-
-		this.gvRemote = new GlView(context);
-		this.addView(this.gvRemote, FrameLayout.LayoutParams.MATCH_PARENT,
-				FrameLayout.LayoutParams.MATCH_PARENT);
+		this.mContext = context;
+		// this.mCall=VcManager.get().getCurrentCall();
+		this.setBackgroundColor(Color.BLACK);
+		this.mHasRecvRemoteCameraParameters = false;
+		this.mHasSetMyCameraParameters = false;
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
 				LOCAL_SV_WIDTH, LOCAL_SV_HEIGHT, Gravity.TOP | Gravity.RIGHT);
+		this.svLocal = new SurfaceView(context);
+		this.svLocal.setZOrderOnTop(true);
 		this.addView(this.svLocal, params);
 
 		this.ivHangup = new ImageView(context);
@@ -64,21 +76,38 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		this.mSurfaceHolder.setFixedSize(LOCAL_SV_WIDTH, LOCAL_SV_HEIGHT); // 预览大小設置
 		this.mSurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		this.mSurfaceHolder.addCallback(this);
-		this.startCamera();
-		VcManager.get().setMyCameraParameters(this.mPreviewWidth,
-				this.mPreviewHeight, this.mPreviewFps);
-		Log.i(TAG, String.format("Width=%d, Height=%d,FPS=%d.", this.mPreviewWidth,this.mPreviewHeight,this.mPreviewFps));
+		this.mCamera = Camera.open();
+		this.post(new Runnable() {
+
+			@Override
+			public void run() {
+				startCamera();
+			}
+		});
+
+		this.mRemoteCameraParametersReceiver = new RemoteCameraParametersReceiver();
+		IntentFilter intentFilter = new IntentFilter(
+				Constant.Action.REMOTE_CAMERA_PARAMETERS);
+		this.mContext.registerReceiver(this.mRemoteCameraParametersReceiver,
+				intentFilter);
 	}
 
+	public void hide() {
+		this.svLocal.setZOrderOnTop(false);
+		this.svLocal.setVisibility(View.GONE);
+		this.setVisibility(View.GONE);
+	}
+
+	@SuppressWarnings("deprecation")
 	private void startCamera() {
-		this.mCamera = Camera.open();
+
 		try {
 			mCamera.setPreviewDisplay(this.mSurfaceHolder);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		Camera.Parameters parameters = mCamera.getParameters();
-		// this.mPreviewFps=parameters.setPreviewFpsRange(min, max);
 		List<Size> supportedPreviewSizes = parameters
 				.getSupportedPreviewSizes();
 		int selectIndex = supportedPreviewSizes.size() / 2;
@@ -90,10 +119,29 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		// parameters.setPreviewFrameRate(CAMERA_FPS);
 		parameters.setPreviewFpsRange(CAMERA_FPS * 1000, CAMERA_FPS * 1000);
 		this.mPreviewFps = CAMERA_FPS;
+
 		mCamera.setDisplayOrientation(90);
 		mCamera.setParameters(parameters);
 		mCamera.setPreviewCallback((PreviewCallback) this);
 		mCamera.startPreview();
+		VcManager.get().setMyCameraParameters(this.mPreviewWidth,
+				this.mPreviewHeight, this.mPreviewFps);
+		this.mHasSetMyCameraParameters = true;
+		Log.i(TAG, String.format("Width=%d, Height=%d,FPS=%d.",
+				this.mPreviewWidth, this.mPreviewHeight, this.mPreviewFps));
+		this.initGlView();
+	}
+
+	private void initGlView() {
+		if (this.mHasRecvRemoteCameraParameters
+				&& this.mHasSetMyCameraParameters) {
+			Log.i(TAG, "Init GlSurfaceView.");
+			this.gvRemote = new GlView(this.mContext);
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.MATCH_PARENT,
+					FrameLayout.LayoutParams.MATCH_PARENT);
+			this.addView(this.gvRemote, 1, params);
+		}
 	}
 
 	@Override
@@ -103,6 +151,7 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		this.mCamera.stopPreview();
 		this.mCamera.release();
 		this.mCamera = null;
+		this.mContext.unregisterReceiver(this.mRemoteCameraParametersReceiver);
 	}
 
 	@Override
@@ -130,6 +179,16 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 	public void onClick(View v) {
 		VcManager.get().handleCall(VcManager.get().getCurrentCall(),
 				VcCallAction.CALL_ACTION_HANGUP);
+	}
+
+	class RemoteCameraParametersReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			VcVideoView.this.mHasRecvRemoteCameraParameters = true;
+			Log.i(TAG, "Received remote camera parameters.");
+			VcVideoView.this.initGlView();
+		}
 	}
 
 }

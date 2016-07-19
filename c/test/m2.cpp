@@ -18,7 +18,7 @@ public:
 	}
 	void onIncoming(VcCall * call) {
 		LOG("Incoming Call!\n");
-		sleep(5);
+		//sleep(5);
 		VcManager::get()->handleCall(call, VcCallAction::CALL_ACTION_ANSWER);
 	}
 	void onDisconnect(VcCall *call) {
@@ -27,7 +27,7 @@ public:
 	void onConfirmed(VcCall *call) {
 		LOG("Call Confirmed!\n");
 		//VcManager::get()->handleCall(call,CallAction::CALL_ACTION_HANGUP);
-
+		//sleep(3);
 		VcManager::get()->setMyCameraParameters(1280,720,30);
 		int *data = new int();
 		*data = VcCallAction::CALL_ACTION_HANGUP;
@@ -54,6 +54,7 @@ void * pushFrame(void * args) {
 	while (true) {
 		//LOG("Read Start!\n");
 		int rFile = open("/home/zzh/video", O_RDONLY);
+		//int rFile = open("/sdcard/video", O_RDONLY);
 		int ii = 0;
 		i++;
 		while (read(rFile, buffer, bufferSize) > 0) {

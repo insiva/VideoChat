@@ -15,8 +15,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 public class VcService extends Service implements FriendManager.FriendListener {
+	static final String TAG = "VcService";
+
 	private VcCall mCurrentCall;
 
 	static final String START_COMMAND_KEY = "command";
@@ -28,6 +31,7 @@ public class VcService extends Service implements FriendManager.FriendListener {
 	}
 
 	private VcManager mVcManager;
+	private MyCallback mVcCallback;
 
 	@Override
 	public void onCreate() {
@@ -65,7 +69,8 @@ public class VcService extends Service implements FriendManager.FriendListener {
 			this.mVcManager = VcManager.init(FriendManager.get().me().mAddr,
 					FriendManager.get().me().mPort,
 					FriendManager.get().me().mSsrc);
-			this.mVcManager.setCallback(new MyCallback());
+			this.mVcCallback=new MyCallback();
+			this.mVcManager.setCallback(this.mVcCallback);
 		}
 	}
 
@@ -75,6 +80,8 @@ public class VcService extends Service implements FriendManager.FriendListener {
 			this.mVcManager.setCallback(null);
 			VcManager.deinit();
 			this.mVcManager = null;
+			this.mVcCallback=null;
+			System.gc();
 		}
 	}
 
@@ -93,11 +100,17 @@ public class VcService extends Service implements FriendManager.FriendListener {
 	}
 
 	class MyCallback extends VcCallback {
+
+		MyCallback() {
+			super();
+		}
+
 		@Override
 		public void onIncoming(VcCall call) {
 			mCurrentCall = call;
-			CallActivity.startActivity(VcService.this, call.getFriend().getSsrc(), false);
-			Intent intent=new Intent(Constant.Action.CALL_STATE);
+			CallActivity.startActivity(VcService.this, call.getFriend()
+					.getSsrc(), false, true);
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
 			intent.putExtra(Constant.CallState.KEY, Constant.CallState.INCOMING);
 			VcService.this.sendBroadcast(intent);
 		}
@@ -105,30 +118,55 @@ public class VcService extends Service implements FriendManager.FriendListener {
 		@Override
 		public void onEstablished(VcCall call) {
 			mCurrentCall = call;
-			Intent intent=new Intent(Constant.Action.CALL_STATE);
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
 			intent.putExtra(Constant.CallState.KEY, Constant.CallState.INCOMING);
 			VcService.this.sendBroadcast(intent);
 		}
 
 		@Override
 		public void onConfirmed(VcCall call) {
-			Intent intent=new Intent(Constant.Action.CALL_STATE);
-			intent.putExtra(Constant.CallState.KEY, Constant.CallState.CONFIMRED);
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
+			intent.putExtra(Constant.CallState.KEY,
+					Constant.CallState.CONFIMRED);
 			VcService.this.sendBroadcast(intent);
 		}
 
 		@Override
 		public void onOutgoFail(VcCall call) {
-			Intent intent=new Intent(Constant.Action.CALL_STATE);
-			intent.putExtra(Constant.CallState.KEY, Constant.CallState.OUTGO_FAILED);
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
+			intent.putExtra(Constant.CallState.KEY,
+					Constant.CallState.OUTGO_FAILED);
 			VcService.this.sendBroadcast(intent);
 		}
 
 		@Override
 		public void onDisconnect(VcCall call) {
-			Intent intent=new Intent(Constant.Action.CALL_STATE);
-			intent.putExtra(Constant.CallState.KEY, Constant.CallState.DISCONNECTED);
+			Log.i(TAG, "OnDisconnect0!");
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
+			intent.putExtra(Constant.CallState.KEY,
+					Constant.CallState.DISCONNECTED);
 			VcService.this.sendBroadcast(intent);
+			Log.i(TAG, "OnDisconnect!");
+		}
+		
+		@Override
+		public void onRemoteCameraParametersRecved(int width, int height,
+				int fps) {
+			Intent intent = new Intent(Constant.Action.REMOTE_CAMERA_PARAMETERS);
+			intent.putExtra(Constant.KEY_WIDTH, width);
+			intent.putExtra(Constant.KEY_HEIGHT, height);
+			intent.putExtra(Constant.KEY_FPS, fps);
+			VcService.this.sendBroadcast(intent);
+			Log.i(TAG, "onRemoteCameraParametersRecved!");
+		}
+		
+		@Override
+		public void onTimeout(VcCall arg0) {
+			Intent intent = new Intent(Constant.Action.CALL_STATE);
+			intent.putExtra(Constant.CallState.KEY,
+					Constant.CallState.DISCONNECTED);
+			VcService.this.sendBroadcast(intent);
+			Log.i(TAG, "OnDisconnect!");
 		}
 	}
 
