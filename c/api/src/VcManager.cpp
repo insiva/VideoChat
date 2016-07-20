@@ -77,7 +77,7 @@ void VcManager::handleCall(VcCall *call, VcCallAction action) {
 }
 
 void VcManager::handleMessage(XMessage *msg) {
-	uchar *buffer =XNULL;
+	uchar *buffer = XNULL;
 	switch (msg->getWhat()) {
 	case WHAT_CALL_NO_RESPONSE_TIMEOUT:
 		this->asyncCallTimeout();
@@ -89,14 +89,14 @@ void VcManager::handleMessage(XMessage *msg) {
 		buffer = (uchar *) msg->getData();
 		this->pVideoManager->onYv12FramePushed(buffer + sizeof(size_t));
 		delete[] buffer;
-		buffer=XNULL;
+		buffer = XNULL;
 		break;
 	case WHAT_NEW_H264_FRAME_RECVED:
-		buffer = (uchar *)  msg->getData();
+		buffer = (uchar *) msg->getData();
 		size_t length = *((size_t *) buffer);
 		this->pVideoManager->onH264FrameRecved(buffer + sizeof(size_t), length);
 		delete[] buffer;
-		buffer=XNULL;
+		buffer = XNULL;
 		break;
 	}
 }
@@ -146,17 +146,18 @@ void VcManager::onRemoteCameraParametersRecved(int width, int height, int fps) {
 			width, height, fps);
 }
 
-void VcManager::pushYv12Frame(char *buffer, size_t length) {
+int VcManager::pushYv12Frame(char *buffer, size_t length) {
 	if (this->pCallManager->pCurrentCall != XNULL
 			&& this->pCallManager->pCurrentCall->mState
 					== VcCallState::CONFIRMED) {
-		this->pVideoManager->onYv12FramePushed((uchar *) buffer);
+		int bytes = this->pVideoManager->onYv12FramePushed((uchar *) buffer);
+		return bytes;
 		/*
-		uchar *newBuffer = new uchar[sizeof(size_t) + length];
-		memcpy(newBuffer, &length, sizeof(size_t));
-		memcpy(newBuffer + sizeof(size_t), buffer, length);
-		XMessage *msg = XMessage::obtain(WHAT_NEW_YV12_FRAME_PUSHED, newBuffer);
-		*/
+		 uchar *newBuffer = new uchar[sizeof(size_t) + length];
+		 memcpy(newBuffer, &length, sizeof(size_t));
+		 memcpy(newBuffer + sizeof(size_t), buffer, length);
+		 XMessage *msg = XMessage::obtain(WHAT_NEW_YV12_FRAME_PUSHED, newBuffer);
+		 */
 	}
 }
 
@@ -164,15 +165,16 @@ void VcManager::onDataPacketRecved(DataPacket *dp) {
 	if (this->pCallManager->pCurrentCall != XNULL
 			&& this->pCallManager->pCurrentCall->mState
 					== VcCallState::CONFIRMED) {
-		this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),dp->getLength());
+		this->pVideoManager->onH264FrameRecved((uchar *) dp->getBuffer(),
+				dp->getLength());
 		/*
-		uchar *buffer = dp->getBuffer();
-		size_t length = dp->getLength();
-		uchar *newBuffer = new uchar[sizeof(size_t) + length];
-		memcpy(newBuffer, &length, sizeof(size_t));
-		memcpy(newBuffer + sizeof(size_t), buffer, length);
-		XMessage *msg = XMessage::obtain(WHAT_NEW_H264_FRAME_RECVED, newBuffer);
-		*/
+		 uchar *buffer = dp->getBuffer();
+		 size_t length = dp->getLength();
+		 uchar *newBuffer = new uchar[sizeof(size_t) + length];
+		 memcpy(newBuffer, &length, sizeof(size_t));
+		 memcpy(newBuffer + sizeof(size_t), buffer, length);
+		 XMessage *msg = XMessage::obtain(WHAT_NEW_H264_FRAME_RECVED, newBuffer);
+		 */
 	}
 }
 
@@ -199,8 +201,8 @@ int VcManager::getEncodeFps() const {
 }
 
 #ifdef __ANDROID__
-void VcManager::initGl(int viewWidth, int viewHeight) {
-	this->pVideoManager->initGlHepler(viewWidth, viewHeight);
+void VcManager::initGl(int viewWidth, int viewHeight,const char *buildModel) {
+	this->pVideoManager->initGlHepler(viewWidth, viewHeight,buildModel);
 }
 
 void VcManager::deinitGl() {

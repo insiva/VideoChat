@@ -32,8 +32,10 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		SurfaceHolder.Callback, PreviewCallback {
 	static final String TAG = "VcVideoView";
 	static final int LOCAL_SV_WIDTH = 240;
-	static final int LOCAL_SV_HEIGHT = 450;
-	static final int CAMERA_FPS = 16;
+	static final int LOCAL_SV_HEIGHT = 320;
+	static final int PREVIEW_WIDTH = 320;
+	static final int PREVIEW_HEIGHT = 240;
+	static final int CAMERA_FPS = 10;
 	// private VcCall mCall;
 
 	private Context mContext;
@@ -45,8 +47,13 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 	private ImageView ivHangup;
 	private int mPreviewWidth, mPreviewHeight;
 	private int mPreviewFps;
-	private boolean mHasSetMyCameraParameters, mHasRecvRemoteCameraParameters;
+	private boolean mHasRecvRemoteCameraParameters;
 	private RemoteCameraParametersReceiver mRemoteCameraParametersReceiver;
+
+	private int mFrameCount = 0;
+	private long mFirstFrameTime = 0;
+	private int mTotalBytes = 0;
+	private long mTotalCostTime = 0;
 
 	public VcVideoView(Context context) {
 		super(context);
@@ -54,7 +61,6 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		// this.mCall=VcManager.get().getCurrentCall();
 		this.setBackgroundColor(Color.BLACK);
 		this.mHasRecvRemoteCameraParameters = false;
-		this.mHasSetMyCameraParameters = false;
 		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
 				LOCAL_SV_WIDTH, LOCAL_SV_HEIGHT, Gravity.TOP | Gravity.RIGHT);
 		this.svLocal = new SurfaceView(context);
@@ -108,11 +114,10 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		}
 
 		Camera.Parameters parameters = mCamera.getParameters();
-		List<Size> supportedPreviewSizes = parameters
-				.getSupportedPreviewSizes();
-		int selectIndex = supportedPreviewSizes.size() / 2;
-		this.mPreviewWidth = supportedPreviewSizes.get(selectIndex).width;
-		this.mPreviewHeight = supportedPreviewSizes.get(selectIndex).height;
+		// List<Size> supportedPreviewSizes = parameters
+		// .getSupportedPreviewSizes();
+		this.mPreviewWidth = PREVIEW_WIDTH;
+		this.mPreviewHeight = PREVIEW_HEIGHT;
 		parameters.setPreviewSize(this.mPreviewWidth, this.mPreviewHeight);
 		parameters.setPictureSize(this.mPreviewWidth, this.mPreviewHeight);
 		parameters.setPreviewFormat(ImageFormat.YV12);
@@ -126,15 +131,13 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 		mCamera.startPreview();
 		VcManager.get().setMyCameraParameters(this.mPreviewWidth,
 				this.mPreviewHeight, this.mPreviewFps);
-		this.mHasSetMyCameraParameters = true;
-		Log.i(TAG, String.format("Width=%d, Height=%d,FPS=%d.",
+		Log.i(TAG, String.format("My:Width=%d, Height=%d,FPS=%d.",
 				this.mPreviewWidth, this.mPreviewHeight, this.mPreviewFps));
 		this.initGlView();
 	}
 
 	private void initGlView() {
-		if (this.mHasRecvRemoteCameraParameters
-				&& this.mHasSetMyCameraParameters) {
+		if (this.mHasRecvRemoteCameraParameters) {
 			Log.i(TAG, "Init GlSurfaceView.");
 			this.gvRemote = new GlView(this.mContext);
 			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
@@ -156,7 +159,27 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 
 	@Override
 	public void onPreviewFrame(byte[] data, Camera camera) {
-		VC.pushYv12Frame(data);
+		long t1 = System.currentTimeMillis();
+		if (this.mFrameCount == 0) {
+			this.mFirstFrameTime = System.currentTimeMillis();
+		} else {
+			if (this.mFrameCount % CAMERA_FPS == 0) {
+				double ts = (System.currentTimeMillis() - this.mFirstFrameTime) / 1000d;
+				double fps = (double) mFrameCount / ts;
+				double speed = this.mTotalBytes / (ts * 1024d);
+				Log.d(TAG,
+						String.format(
+								"Local Count:%d, AvgCost:%d, FPS:%f2, Total Bytes:%d, Speed:%f kBps",
+								this.mFrameCount, this.mTotalCostTime
+										/ this.mFrameCount, fps,
+								this.mTotalBytes, speed));
+			}
+		}
+		this.mFrameCount++;
+		this.mTotalBytes += VC.pushYv12Frame(data);
+		this.mTotalCostTime += (System.currentTimeMillis() - t1);
+		// Log.d(TAG,String.format("Duration:%d", System.currentTimeMillis() -
+		// t1));
 	}
 
 	@Override

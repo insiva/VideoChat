@@ -65,4 +65,7 @@ enum RtcpType {
 
 #define ERROR_CODE_RTP_DATA_OVERSIZE -2
 
+#define MODEL_U9180 "U9180"
+#define MODEL_CAM_AL00 "CAM-AL00"
+
 #endif /* CONFIG_CONFIG_H_ */

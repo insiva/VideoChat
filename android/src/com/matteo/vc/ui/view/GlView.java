@@ -10,6 +10,7 @@ import com.matteo.vc.jni.VcManager;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 
@@ -54,8 +55,7 @@ public class GlView  extends GLSurfaceView {
 
 		@Override
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
-			Log.i(TAG, String.format("Thread ID:%d\n",Thread.currentThread().getId()));
-			VcManager.get().initGl(width, height);
+			VcManager.get().initGl(width, height,Build.MODEL);
 		}
 
 		@Override

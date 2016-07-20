@@ -34,17 +34,33 @@ static const char* VERTEX_SHADER = "attribute vec4 vPosition;    \n"
 		"varying vec2 tc;     \n"
 		"void main()                  \n"
 		"{                            \n"
-		"   gl_Position = vPosition;  \n"
+		"   gl_Position = mat4("
+		" 0, -1, 0, 0,\n"
+		" 1, 0, 0, 0,\n"
+		" 0, 0, 1, 0,\n"
+		" 0, 0, 0, 1) "
+		"* vPosition;  \n"
 		"   tc = a_texCoord;  \n"
 		"}                            \n";
 
 enum {
 	ATTRIB_VERTEX, ATTRIB_TEXTURE,
 };
+
+static GLfloat SquareVertices[][8] = {
+		{ 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, }, //中兴
+		{ -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, } //华为
+};
+static GLfloat CoordVertices[][8] = { { -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f,
+		1.0f, }, //中兴
+		{ 0.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, } //华为
+};
+
 class GlHelper {
 
 public:
-	GlHelper(int viewWidth, int viewHeight, int videoWidth, int videoHeight);
+	GlHelper(int viewWidth, int viewHeight, int videoWidth, int videoHeight,
+			const char *buildModel);
 	~GlHelper();
 
 	void write(const uchar *buffer, size_t len);
@@ -61,13 +77,14 @@ private:
 	GLuint gTexYId;
 	GLuint gTexUId;
 	GLuint gTexVId;
+	int nModelIndex;
 
 	static GLuint createProgram(const char *vertexShader,
 			const char *fragShader);
 	static void checkGlError(const char* op);
 	static GLuint buildShader(const char* source, GLenum shaderType);
-	static GLuint bindTexture(GLuint texture, const unsigned char *buffer, GLuint videoWidth,
-			GLuint videoHeight);
+	static GLuint bindTexture(GLuint texture, const unsigned char *buffer,
+			GLuint videoWidth, GLuint videoHeight);
 };
 
 #endif /* INCLUDE_ANDROID_GLHELPER_H_ */

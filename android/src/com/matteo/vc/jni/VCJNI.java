@@ -16,9 +16,9 @@ public class VCJNI {
   public final static native long VcManager_getCurrentCall(long jarg1, VcManager jarg1_);
   public final static native void VcManager_setCallback(long jarg1, VcManager jarg1_, long jarg2, VcCallback jarg2_);
   public final static native void VcManager_handleCall(long jarg1, VcManager jarg1_, long jarg2, VcCall jarg2_, int jarg3);
-  public final static native void VcManager_pushYv12Frame(long jarg1, VcManager jarg1_, String jarg2, long jarg3);
+  public final static native int VcManager_pushYv12Frame(long jarg1, VcManager jarg1_, String jarg2, long jarg3);
   public final static native void VcManager_setMyCameraParameters(long jarg1, VcManager jarg1_, int jarg2, int jarg3, int jarg4);
-  public final static native void VcManager_initGl(long jarg1, VcManager jarg1_, int jarg2, int jarg3);
+  public final static native void VcManager_initGl(long jarg1, VcManager jarg1_, int jarg2, int jarg3, String jarg4);
   public final static native void VcManager_deinitGl(long jarg1, VcManager jarg1_);
   public final static native void VcManager_render(long jarg1, VcManager jarg1_);
   public final static native long VcManager_init__SWIG_0(String jarg1, int jarg2, long jarg3);
@@ -63,7 +63,7 @@ public class VCJNI {
   public final static native void delete_VcCallback(long jarg1);
   public final static native void VcCallback_director_connect(VcCallback obj, long cptr, boolean mem_own, boolean weak_global);
   public final static native void VcCallback_change_ownership(VcCallback obj, long cptr, boolean take_or_release);
-  public final static native void pushYv12Frame(byte[] jarg1);
+  public final static native int pushYv12Frame(byte[] jarg1);
 
   public static void SwigDirector_VcCallback_onIncoming(VcCallback jself, long arg0) {
     jself.onIncoming((arg0 == 0) ? null : new VcCall(arg0, false));

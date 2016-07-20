@@ -9,8 +9,8 @@
 package com.matteo.vc.jni;
 
 public class VC {
-  public static void pushYv12Frame(byte[] buffer) {
-    VCJNI.pushYv12Frame(buffer);
+  public static int pushYv12Frame(byte[] buffer) {
+    return VCJNI.pushYv12Frame(buffer);
   }
 
 }

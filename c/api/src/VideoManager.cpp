@@ -6,11 +6,13 @@
  */
 
 #include<api/VideoManager.h>
+#include <utils/XUtils.h>
 
 VideoManager::VideoManager(RtpManager * rtpManager) :
 		pRtpManager(rtpManager), pEncodeI420Buffer(XNULL), pDecodeYv12Buffer(
 		XNULL), pDecodeI420Buffer(XNULL), nEncodeWidth(0), nEncodeFps(0), nEncodeHeight(
-				0), nDecodeWidth(0), nDecodeHeight(0), nDecodeFps(0) {
+				0), nDecodeWidth(0), nDecodeHeight(0), nDecodeFps(0), pEncodeRawI420Buffer(
+		XNULL) {
 	this->pEncoder = new H264Encoder();
 	this->pDecoder = new H264Decoder();
 	pthread_mutex_init(&mLock, XNULL);
@@ -31,6 +33,9 @@ void VideoManager::initEncoder(int width, int height, int fps) {
 	pthread_mutex_lock(&mLock);
 	this->pEncoder->set(width, height, fps, VIDEO_BITRATE);
 	this->pEncoder->open();
+	if (this->pEncodeRawI420Buffer == XNULL) {
+		//this->pEncodeRawI420Buffer=new cuar
+	}
 	if (this->pEncodeI420Buffer == XNULL) {
 		this->pEncodeI420Buffer = new uchar[width * height * 3 / 2];
 	} else {
@@ -96,26 +101,30 @@ void VideoManager::deinitDecoder() {
 	DLOG("deinitDecoder2\n");
 }
 
-void VideoManager::onYv12FramePushed(uchar *yv12Frame) {
-	DLOG("onYv12FramePushed1.\n");
+int VideoManager::onYv12FramePushed(uchar *yv12Frame) {
 	x264_nal_t *nals;
 	int nnal;
+	int bytes = 0;
 	pthread_mutex_lock(&mLock);
 	if (!this->pEncoder->isOpen()) {
-		return;
+		return bytes;
 	}
+	lint t1 = XUtils::currentMilliSeconds();
 	VideoManager::yv12ToI420(this->pEncodeI420Buffer, yv12Frame,
 			this->nEncodeWidth, this->nEncodeHeight);
 	int fs = this->pEncoder->encode(&nals, &nnal, this->pEncodeI420Buffer);
-	DLOG("onYv12FramePushed2.\n");
+	lint t2 = XUtils::currentMilliSeconds();
+	//DLOG("Encode Duration:%d\n",t2-t1);
 	if (fs > 0) {
 		for (int i = 0; i < nnal; ++i) { //将编码数据写入文件.
 			//LOG("A Pushed Frame Encoded, Index=%d, Size=%d.\n", i,nals[i].i_payload);
 			this->pRtpManager->sendRtp(RtpType::H264,
 					(uchar *) nals[i].p_payload, nals[i].i_payload);
+			bytes += nals[i].i_payload;
 		}
 	}
 	pthread_mutex_unlock(&mLock);
+	return bytes;
 }
 
 void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
@@ -133,7 +142,7 @@ void VideoManager::onH264FrameRecved(uchar *h264Buffer, size_t h264Length) {
 	this->pDecoder->decode((uchar *) h264Buffer, h264Length, &frameFinished,
 			this->pDecodeI420Buffer);
 	if (frameFinished) {
-		LOG("A Recved H264 Frame Decoded, Size=%d.\n", h264Length);
+		//LOG("A Recved H264 Frame Decoded, Size=%d.\n", h264Length);
 #ifdef __ANDROID__
 		this->pGlHelper->write(this->pDecodeI420Buffer,
 				this->nDecodeWidth * this->nDecodeHeight * 3 / 2);
@@ -166,8 +175,43 @@ void VideoManager::i420ToYv12(uchar *yv12Buffer, const uchar *i420Buffer,
 			width * height / 4);
 }
 
+void VideoManager::i420spRotate90(uchar *dst, const uchar *src, int srcWidth,
+		int srcHeight) {
+	static int nWidth = 0, nHeight = 0;
+	static int wh = 0;
+	static int uvHeight = 0;
+	if (srcWidth != nWidth || srcHeight != nHeight) {
+		nWidth = srcWidth;
+		nHeight = srcHeight;
+		wh = srcWidth * srcHeight;
+		uvHeight = srcHeight >> 1;			//uvHeight = height / 2
+	}
+
+	//旋转Y
+	int k = 0;
+	for (int i = 0; i < srcWidth; i++) {
+		int nPos = 0;
+		for (int j = 0; j < srcHeight; j++) {
+			dst[k] = src[nPos + i];
+			k++;
+			nPos += srcWidth;
+		}
+	}
+
+	for (int i = 0; i < srcWidth; i += 2) {
+		int nPos = wh;
+		for (int j = 0; j < uvHeight; j++) {
+			dst[k] = src[nPos + i];
+			dst[k + 1] = src[nPos + i + 1];
+			k += 2;
+			nPos += srcWidth;
+		}
+	}
+	return;
+}
+
 #ifdef __ANDROID__
-void VideoManager::initGlHepler(int viewWidth, int viewHeight) {
+void VideoManager::initGlHepler(int viewWidth, int viewHeight,const char *buildModel) {
 	this->nGlViewWidth = viewWidth;
 	this->nGlViewHeight = viewHeight;
 	XASSERT(nGlViewWidth>0&&nDecodeWidth>0,"Local < 0 or Remote < 0\n");
@@ -176,7 +220,7 @@ void VideoManager::initGlHepler(int viewWidth, int viewHeight) {
 		this->pGlHelper = XNULL;
 	}
 	this->pGlHelper = new GlHelper(this->nGlViewWidth, this->nGlViewHeight,
-			this->nDecodeWidth, this->nDecodeHeight);
+			this->nDecodeWidth, this->nDecodeHeight,buildModel);
 	if (this->nGlViewWidth > 0 && this->nDecodeWidth > 0) {
 	}
 }

@@ -36,10 +36,10 @@ public:
 	VcCall *getCurrentCall() const;
 	void setCallback(VcCallback *);
 	void handleCall(VcCall *call, VcCallAction action);
-	void pushYv12Frame(char *buffer, size_t length);
-	void setMyCameraParameters(int width, int height, int fps);
+	int pushYv12Frame(char *buffer, size_t length);
+	void setMyCameraParameters(int height, int width, int fps);
 #ifdef __ANDROID__
-	void initGl(int viewWidth,int viewHeight);
+	void initGl(int viewWidth,int viewHeight,const char *buildModel);
 	void deinitGl();
 	void render();
 #endif

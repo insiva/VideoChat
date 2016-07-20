@@ -27,13 +27,13 @@ public:
 	void initDecoder(int width, int height, int fps);
 	void deinitDecoder();
 
-	void onYv12FramePushed(uchar *yv12Frame);
+	int onYv12FramePushed(uchar *yv12Frame);
 	void onH264FrameRecved(uchar *h264Buffer, size_t h264Length);
 
 private:
 	H264Encoder *pEncoder;
 	H264Decoder *pDecoder;
-	uchar *pEncodeI420Buffer;
+	uchar *pEncodeI420Buffer, *pEncodeRawI420Buffer;;
 	uchar *pDecodeYv12Buffer, *pDecodeI420Buffer;
 	int nEncodeWidth, nEncodeHeight;
 	int nEncodeFps;
@@ -43,7 +43,7 @@ private:
 	pthread_mutex_t mLock;// = PTHREAD_MUTEX_INITIALIZER;
 
 #ifdef __ANDROID__
-	void initGlHepler(int viewWidth, int viewHeight);
+	void initGlHepler(int viewWidth, int viewHeight,const char *buildModel);
 	void deinitGlHelper();
 	void render();
 	GlHelper *pGlHelper;
@@ -54,6 +54,8 @@ private:
 private:
 	static void yv12ToI420(uchar *i420Buffer, const uchar *yv12Buffer,
 			int width, int height);
+	static void i420spRotate90(uchar *dst, const uchar *src, int srcWidth,
+			int srcHeight);
 	static void i420ToYv12(uchar *yv12Buffer, const uchar *i420Buffer,
 			int width, int height);
 };

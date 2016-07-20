@@ -56,16 +56,16 @@ public class VcManager {
     VCJNI.VcManager_handleCall(swigCPtr, this, VcCall.getCPtr(call), call, action.swigValue());
   }
 
-  public void pushYv12Frame(String buffer, long length) {
-    VCJNI.VcManager_pushYv12Frame(swigCPtr, this, buffer, length);
+  public int pushYv12Frame(String buffer, long length) {
+    return VCJNI.VcManager_pushYv12Frame(swigCPtr, this, buffer, length);
   }
 
-  public void setMyCameraParameters(int width, int height, int fps) {
-    VCJNI.VcManager_setMyCameraParameters(swigCPtr, this, width, height, fps);
+  public void setMyCameraParameters(int height, int width, int fps) {
+    VCJNI.VcManager_setMyCameraParameters(swigCPtr, this, height, width, fps);
   }
 
-  public void initGl(int viewWidth, int viewHeight) {
-    VCJNI.VcManager_initGl(swigCPtr, this, viewWidth, viewHeight);
+  public void initGl(int viewWidth, int viewHeight, String buildModel) {
+    VCJNI.VcManager_initGl(swigCPtr, this, viewWidth, viewHeight, buildModel);
   }
 
   public void deinitGl() {

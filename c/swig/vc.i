@@ -16,7 +16,7 @@
 
 %apply(char *STRING, size_t LENGTH) { (char *buffer, size_t len) };
 %inline %{
-	void pushYv12Frame(char *buffer, size_t len) {
-		VcManager::get()->pushYv12Frame(buffer,len);
+	int pushYv12Frame(char *buffer, size_t len) {
+		return VcManager::get()->pushYv12Frame(buffer,len);
 	}
 %}

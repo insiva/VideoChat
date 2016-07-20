@@ -8,8 +8,8 @@
 #include <string.h>
 #include <media/H264Encoder.h>
 
-H264Encoder::H264Encoder() :bIsOpen(false),
-		pX264Handle(XNULL), pX264Param(XNULL) {
+H264Encoder::H264Encoder() :
+		bIsOpen(false), pX264Handle(XNULL), pX264Param(XNULL) {
 	this->pPicIn = new x264_picture_t();
 	this->pPicOut = new x264_picture_t();
 }
@@ -43,9 +43,11 @@ H264Encoder *H264Encoder::set(int width, int height, int fps, int bitRate) {
 	pX264Param->b_open_gop = 0;
 	pX264Param->i_bframe_pyramid = 0;
 	pX264Param->i_bframe_adaptive = X264_B_ADAPT_TRELLIS;
+
+	pX264Param->i_level_idc = 30;
 	//* Log参数，不需要打印编码信息时直接注释掉就行
 #ifdef _XDEBUG_
-	pX264Param->i_log_level = X264_LOG_DEBUG;
+	//pX264Param->i_log_level = X264_LOG_DEBUG;
 #endif
 	//* 速率控制参数
 	//pX264Param->rc.i_rc_method = X264_RC_CQP;  //参数i_rc_method表示码率控制，CQP(恒定质量)，CRF(恒定码率)，ABR(平均码率)
@@ -62,7 +64,7 @@ H264Encoder *H264Encoder::set(int width, int height, int fps, int bitRate) {
 	 rc.f_rf_constant是实际质量，越大图像越花，越小越清晰。
 	 param.rc.f_rf_constant_max ，图像质量的最大值。
 	 */
-	pX264Param->rc.f_rf_constant = 25;
+	pX264Param->rc.f_rf_constant = 15;
 	pX264Param->rc.f_rf_constant_max = 45;
 
 	//* 设置Profile.使用Baseline profile
@@ -83,7 +85,7 @@ void H264Encoder::open() {
 	XASSERT(pX264Param, "Encode Params Not Set!\n");
 	pX264Handle = x264_encoder_open(pX264Param);
 	XASSERT(pX264Handle, "Open X264 Handle Failed!\n");
-	this->bIsOpen=true;
+	this->bIsOpen = true;
 }
 
 bool H264Encoder::isOpen() const {
@@ -93,7 +95,7 @@ bool H264Encoder::isOpen() const {
 }
 
 void H264Encoder::close() {
-	this->bIsOpen=false;
+	this->bIsOpen = false;
 	x264_picture_clean(pPicIn);
 	//x264_picture_clean(pPicOut);
 	if (pX264Handle != XNULL) {
@@ -109,10 +111,8 @@ int H264Encoder::encode(x264_nal_t **ppNals, int *piNal, uchar *i420Buffer) {
 			+ pX264Param->i_width * pX264Param->i_height;
 	pPicIn->img.plane[2] = pPicIn->img.plane[1]
 			+ pX264Param->i_width * pX264Param->i_height / 4;
-	DLOG("H264Encoder::encode1\n");
 	int frameSize = x264_encoder_encode(pX264Handle, ppNals, piNal,
 			this->pPicIn, this->pPicOut);
-	DLOG("H264Encoder::encode2\n");
 	pPicIn->i_dts++;
 	return frameSize;
 }

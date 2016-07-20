@@ -10,15 +10,22 @@
 #include<pthread.h>
 
 GlHelper::GlHelper(int viewWidth, int viewHeight, int videoWidth,
-		int videoHeight) :
+		int videoHeight, const char *buildModel) :
 		gTexYId(0), gTexUId(0), gTexVId(0), gProgram(0), gPositionHandle(0), nGlViewWidth(
 				viewWidth), nGlViewHeight(viewHeight), nVideoWidth(videoWidth), nVideoHeight(
-				videoHeight) {
+				videoHeight), nModelIndex(0) {
 	size_t len = this->nVideoWidth * this->nVideoHeight * 3 / 2;
 	this->pI420Buffer = new uchar[len];
 	memset(this->pI420Buffer, 0, len);
 	pthread_mutex_init(&mLock, XNULL);
+	if (strcmp(buildModel, MODEL_U9180) == 0) {
+		this->nModelIndex = 0;
+	} else if (strcmp(buildModel, MODEL_CAM_AL00) == 0) {
+		this->nModelIndex = 1;
+	}
 	this->init();
+	DLOG("GlWidth:%d,GlHeight:%d;DecodeWidth:%d,DecodeHeight:%d.\n", viewWidth,
+			viewHeight, videoWidth, videoHeight);
 }
 
 GlHelper::~GlHelper() {
@@ -34,7 +41,6 @@ GlHelper::~GlHelper() {
 }
 
 void GlHelper::init() {
-	DLOG("ThreadID:%d\n",pthread_self());
 	gProgram = GlHelper::createProgram(VERTEX_SHADER, FRAG_SHADER);
 	if (!gProgram) {
 		LOGE("Could not create program.");
@@ -56,12 +62,14 @@ void GlHelper::write(const uchar *buffer, size_t len) {
 	pthread_mutex_lock(&mLock);
 	memcpy(this->pI420Buffer, buffer, len);
 	pthread_mutex_unlock(&mLock);
+	//DLOG("Write A Buffer.\n");
 }
 
 void GlHelper::render() {
 	if (this->pI420Buffer == XNULL || this->gProgram == XNULL) {
 		return;
 	}
+	//DLOG("Begin Render.\n");
 	pthread_mutex_lock(&mLock);
 	bindTexture(gTexYId, this->pI420Buffer, this->nVideoWidth,
 			this->nVideoHeight);
@@ -77,13 +85,8 @@ void GlHelper::render() {
 
 void GlHelper::renderFrame() {
 	// HUAWEIG510-0010 4.1.1
-	static GLfloat squareVertices[] = { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-			1.0f, 1.0f, };
 
-	static GLfloat coordVertices[] = { -1.0f, 1.0f, 1.0f, 1.0f, -1.0f, -1.0f,
-			1.0f, -1.0f, };
-
-	glClearColor(0.5f, 0.5f, 0.5f, 1);
+	glClearColor(0.0f, 0.0f, 0.0f, 1);
 	checkGlError("glClearColor");
 	glClear(GL_COLOR_BUFFER_BIT);
 	checkGlError("glClear");
@@ -100,12 +103,14 @@ void GlHelper::renderFrame() {
 	glBindAttribLocation(gProgram, ATTRIB_TEXTURE, "a_texCoord");
 	checkGlError("glBindAttribLocation");
 
-	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0, squareVertices);
+	glVertexAttribPointer(ATTRIB_VERTEX, 2, GL_FLOAT, 0, 0,
+			SquareVertices[this->nModelIndex]);
 	checkGlError("glVertexAttribPointer");
 	glEnableVertexAttribArray(ATTRIB_VERTEX);
 	checkGlError("glEnableVertexAttribArray");
 
-	glVertexAttribPointer(ATTRIB_TEXTURE, 2, GL_FLOAT, 0, 0, coordVertices);
+	glVertexAttribPointer(ATTRIB_TEXTURE, 2, GL_FLOAT, 0, 0,
+			CoordVertices[this->nModelIndex]);
 	checkGlError("glVertexAttribPointer");
 	glEnableVertexAttribArray(ATTRIB_TEXTURE);
 	checkGlError("glEnableVertexAttribArray");
