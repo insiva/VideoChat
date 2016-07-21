@@ -35,7 +35,7 @@ public class VcVideoView extends FrameLayout implements OnClickListener,
 	static final int LOCAL_SV_HEIGHT = 320;
 	static final int PREVIEW_WIDTH = 320;
 	static final int PREVIEW_HEIGHT = 240;
-	static final int CAMERA_FPS = 10;
+	static final int CAMERA_FPS = 16;
 	// private VcCall mCall;
 
 	private Context mContext;

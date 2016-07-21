@@ -23,6 +23,6 @@ const int WHAT_CALL_ACTION = 0x2002;
 const int WHAT_NEW_YV12_FRAME_PUSHED = 0x3001;
 const int WHAT_NEW_H264_FRAME_RECVED = 0x3002;
 
-const int VIDEO_BITRATE = 1024 * 1.5;
+const int VIDEO_BITRATE = 1024 * 3;
 
 #endif /* INCLUDE_API_CONFIG_H_ */

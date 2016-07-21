@@ -66,6 +66,10 @@ void GlHelper::write(const uchar *buffer, size_t len) {
 }
 
 void GlHelper::render() {
+	glClearColor(0.0f, 0.0f, 0.0f, 1);
+	checkGlError("glClearColor");
+	glClear(GL_COLOR_BUFFER_BIT);
+	checkGlError("glClear");
 	if (this->pI420Buffer == XNULL || this->gProgram == XNULL) {
 		return;
 	}
@@ -86,10 +90,6 @@ void GlHelper::render() {
 void GlHelper::renderFrame() {
 	// HUAWEIG510-0010 4.1.1
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1);
-	checkGlError("glClearColor");
-	glClear(GL_COLOR_BUFFER_BIT);
-	checkGlError("glClear");
 	//PRINTF("setsampler %d %d %d", g_texYId, g_texUId, g_texVId);
 	GLint tex_y = glGetUniformLocation(gProgram, "SamplerY");
 	checkGlError("glGetUniformLocation");
